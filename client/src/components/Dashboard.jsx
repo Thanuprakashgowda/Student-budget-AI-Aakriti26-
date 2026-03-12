@@ -256,18 +256,80 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
           </div>
 
           <div className="glass-card animate-fade-in" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '16px', fontSize: '1rem', fontWeight: 700 }}>📊 Budget vs Spent</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="category" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="Budget" fill="rgba(255,255,255,0.08)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Spent" radius={[4, 4, 0, 0]}>
+            <h3 style={{ marginBottom: '16px', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--amber)' }}>📊</span> Budget vs Spent
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={barData} margin={{ top: 20, right: 10, left: -15, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--amber)" stopOpacity={1} />
+                    <stop offset="100%" stopColor="var(--amber-dark)" stopOpacity={0.8} />
+                  </linearGradient>
+                  <linearGradient id="budgetGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.12)" stopOpacity={1} />
+                    <stop offset="100%" stopColor="rgba(255,255,255,0.02)" stopOpacity={0.5} />
+                  </linearGradient>
+                  {/* Category specific gradients */}
+                  <linearGradient id="grad-Food" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF8C00" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#CC6F00" stopOpacity={0.8} />
+                  </linearGradient>
+                  <linearGradient id="grad-Transport" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00D4FF" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#007791" stopOpacity={0.8} />
+                  </linearGradient>
+                  <linearGradient id="grad-Study" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00E676" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#00A152" stopOpacity={0.8} />
+                  </linearGradient>
+                  <linearGradient id="grad-Entertainment" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF5252" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#C62828" stopOpacity={0.8} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                <XAxis 
+                  dataKey="category" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 500 }} 
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                />
+                <Tooltip 
+                  content={<CustomTooltip />} 
+                  cursor={{ fill: 'rgba(255,255,255,0.03)', radius: [8, 8, 0, 0] }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  align="right" 
+                  iconType="circle"
+                  wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 600 }}
+                  formatter={(value) => <span style={{ color: 'var(--text-secondary)', paddingLeft: '4px' }}>{value}</span>}
+                />
+                <Bar 
+                  dataKey="Budget" 
+                  fill="url(#budgetGradient)" 
+                  radius={[6, 6, 0, 0]} 
+                  barSize={32}
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth={1}
+                />
+                <Bar 
+                  dataKey="Spent" 
+                  radius={[6, 6, 0, 0]} 
+                  barSize={32}
+                  activeBar={{ filter: 'brightness(1.2) drop-shadow(0 0 8px rgba(255,140,0,0.3))' }}
+                >
                   {barData.map((entry, index) => {
-                    const color = categoryInfo[entry.category]?.color || COLORS[index % COLORS.length];
-                    return <Cell key={entry.category} fill={color} />;
+                    const gradId = `url(#grad-${entry.category})`;
+                    const fallbackColor = COLORS[index % COLORS.length];
+                    return <Cell key={entry.category} fill={["Food", "Transport", "Study", "Entertainment"].includes(entry.category) ? gradId : fallbackColor} />;
                   })}
                 </Bar>
               </BarChart>
