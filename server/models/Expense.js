@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
   amount: {
-    type: Number,
-    required: true,
-    min: 0
+    type: mongoose.Schema.Types.Mixed,
+    required: true
   },
+  amount_encrypted: String,
+  description_encrypted: String,
   description: {
     type: String,
     required: true,
@@ -16,6 +17,11 @@ const expenseSchema = new mongoose.Schema({
     type: String,
     required: true,
     default: 'Food'
+  },
+  phone: String,
+  source: {
+    type: String,
+    default: 'web'
   },
   date: {
     type: Date,

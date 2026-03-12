@@ -23,6 +23,13 @@ app.use(express.urlencoded({ extended: true }));
 // Make io accessible in routes
 app.set('io', io);
 
+// In-memory global state for demo mode
+const dbState = {
+  expenses: [],
+  nextId: 1
+};
+app.set('dbState', dbState);
+
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studentbudgetai';
 
@@ -39,11 +46,14 @@ const expensesRouter = require('./routes/expenses');
 const categorizeRouter = require('./routes/categorize');
 const authRouter = require('./routes/auth');
 const chatRouter = require('./routes/chat');
+const whatsappRoutes = require('./routes/whatsapp');
 
 app.use('/api/auth', authRouter);
 app.use('/api/expenses', expensesRouter);
 app.use('/api/categorize', categorizeRouter);
 app.use('/api/chat', chatRouter);
+app.use('/whatsapp', whatsappRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -81,34 +91,68 @@ function setupInMemoryMode() {
     { amount: 180, description: 'Biryani dinner with friends', category: 'Food', date: new Date('2026-03-07'), aiConfidence: 0.93 }
   ];
 
-  inMemoryExpenses = sampleData.map(e => ({ ...e, _id: String(nextId++), userId: 'demo-user', createdAt: new Date() }));
+  dbState.expenses = sampleData.map(e => ({ ...e, _id: String(dbState.nextId++), userId: 'demo-user', createdAt: new Date() }));
 
-  // Override routes with in-memory versions
   app.get('/api/expenses', (req, res) => {
     const totals = {};
-    inMemoryExpenses.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
-    res.json({ success: true, expenses: inMemoryExpenses.sort((a, b) => new Date(b.date) - new Date(a.date)), totals, count: inMemoryExpenses.length });
+    dbState.expenses.forEach(e => { 
+      const amt = parseFloat(e.amount) || 0;
+      totals[e.category] = (totals[e.category] || 0) + amt; 
+    });
+    res.json({ success: true, expenses: dbState.expenses.sort((a, b) => new Date(b.date) - new Date(a.date)), totals, count: dbState.expenses.length });
+  });
+
+  app.get('/api/expenses/stats', (req, res) => {
+    const now = new Date();
+    const thisMonth = dbState.expenses.filter(e => {
+      const d = new Date(e.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+
+    const stats = {
+      totalExpenses: dbState.expenses.length,
+      totalAmount: dbState.expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0),
+      thisMonthAmount: thisMonth.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0),
+      byCategory: {}
+    };
+
+    ['Food', 'Transport', 'Study', 'Entertainment'].forEach(cat => {
+      stats.byCategory[cat] = thisMonth
+        .filter(e => e.category === cat)
+        .reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+    });
+
+    res.json({ success: true, stats });
   });
 
   app.post('/api/expenses', (req, res) => {
-    const expense = { ...req.body, _id: String(nextId++), userId: 'demo-user', createdAt: new Date(), date: req.body.date ? new Date(req.body.date) : new Date() };
-    inMemoryExpenses.unshift(expense);
+    const amount = parseFloat(req.body.amount) || 0;
+    const expense = { 
+      ...req.body, 
+      amount,
+      _id: String(dbState.nextId++), 
+      userId: 'demo-user', 
+      createdAt: new Date(), 
+      date: req.body.date ? new Date(req.body.date) : new Date() 
+    };
+    dbState.expenses.unshift(expense);
     io.emit('expense:created', expense);
     res.status(201).json({ success: true, expense });
   });
 
   app.put('/api/expenses/:id', (req, res) => {
-    const idx = inMemoryExpenses.findIndex(e => e._id === req.params.id);
+    const idx = dbState.expenses.findIndex(e => e._id === req.params.id);
     if (idx === -1) return res.status(404).json({ success: false, error: 'Not found' });
-    inMemoryExpenses[idx] = { ...inMemoryExpenses[idx], ...req.body };
-    io.emit('expense:updated', inMemoryExpenses[idx]);
-    res.json({ success: true, expense: inMemoryExpenses[idx] });
+    const amount = req.body.amount ? parseFloat(req.body.amount) : dbState.expenses[idx].amount;
+    dbState.expenses[idx] = { ...dbState.expenses[idx], ...req.body, amount };
+    io.emit('expense:updated', dbState.expenses[idx]);
+    res.json({ success: true, expense: dbState.expenses[idx] });
   });
 
   app.delete('/api/expenses/:id', (req, res) => {
-    const idx = inMemoryExpenses.findIndex(e => e._id === req.params.id);
+    const idx = dbState.expenses.findIndex(e => e._id === req.params.id);
     if (idx === -1) return res.status(404).json({ success: false, error: 'Not found' });
-    inMemoryExpenses.splice(idx, 1);
+    dbState.expenses.splice(idx, 1);
     io.emit('expense:deleted', { id: req.params.id });
     res.json({ success: true, message: 'Deleted' });
   });

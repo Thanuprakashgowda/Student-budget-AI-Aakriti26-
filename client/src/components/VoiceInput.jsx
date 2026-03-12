@@ -56,38 +56,72 @@ const VoiceInput = ({ onResult }) => {
       setError('Speech not supported in this browser');
       return;
     }
+    if (isListening) return;
+
     setError(null);
     setTranscript('');
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-IN';
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 3;
-    recognitionRef.current = recognition;
+    try {
+      if (recognitionRef.current) {
+        // Abort any existing instance safely
+        try { recognitionRef.current.abort(); } catch(e) {}
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = window.navigator.language || 'en-US';
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognitionRef.current = recognition;
 
     recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
     recognition.onerror = (e) => {
       setIsListening(false);
-      if (e.error !== 'no-speech') setError(`Voice error: ${e.error}`);
+      console.warn("Speech API Error:", e.error);
+      if (e.error === 'no-speech' || e.error === 'aborted') return;
+      if (e.error === 'network') {
+        setError('Browser voice service unavailable.');
+      } else {
+        setError(`Voice error: ${e.error}`);
+      }
     };
     recognition.onresult = (e) => {
-      const result = Array.from(e.results).map(r => r[0].transcript).join('');
-      setTranscript(result);
-      if (e.results[0].isFinal) {
-        const parsed = extractFromVoice(result);
+      let finalTranscript = '';
+      let interimTranscript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript;
+        } else {
+          interimTranscript += e.results[i][0].transcript;
+        }
+      }
+      
+      const currentText = finalTranscript || interimTranscript;
+      setTranscript(currentText);
+      
+      if (finalTranscript) {
+        const parsed = extractFromVoice(finalTranscript);
         onResult(parsed);
       }
     };
 
-    recognition.start();
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+      setError('Mic access denied or already listening.');
+      setIsListening(false);
+    }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
     setIsListening(false);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
   };
 
   if (!supported) {

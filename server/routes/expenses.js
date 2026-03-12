@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const auth = require('../middleware/auth');
+const { encryptField, decryptField } = require('../middleware/encryption');
 
 // GET /api/expenses - List all expenses
 router.get('/', auth, async (req, res) => {
@@ -24,12 +25,22 @@ router.get('/', auth, async (req, res) => {
 
     // Calculate totals by category
     const allExpenses = await Expense.find({ userId: req.userId });
-    const totals = {};
-    allExpenses.forEach(e => {
-      totals[e.category] = (totals[e.category] || 0) + e.amount;
+    
+    // Decrypt fields and calculate totals
+    const decryptedExpenses = expenses.map(e => {
+      const expense = e.toObject();
+      if (expense.amount_encrypted) expense.amount = parseFloat(decryptField(expense.amount_encrypted));
+      if (expense.description_encrypted) expense.description = decryptField(expense.description_encrypted);
+      return expense;
     });
 
-    res.json({ success: true, expenses, totals, count: allExpenses.length });
+    const totals = {};
+    allExpenses.forEach(e => {
+      const amt = e.amount_encrypted ? parseFloat(decryptField(e.amount_encrypted)) : e.amount;
+      totals[e.category] = (totals[e.category] || 0) + amt;
+    });
+
+    res.json({ success: true, expenses: decryptedExpenses, totals, count: allExpenses.length });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -41,7 +52,9 @@ router.post('/', auth, async (req, res) => {
     const { amount, description, category, date, aiConfidence } = req.body;
     const expense = new Expense({
       amount: parseFloat(amount),
+      amount_encrypted: encryptField(String(amount)),
       description,
+      description_encrypted: encryptField(description),
       category,
       date: date ? new Date(date) : new Date(),
       aiConfidence: aiConfidence || 0,
@@ -62,9 +75,13 @@ router.post('/', auth, async (req, res) => {
 // PUT /api/expenses/:id - Update expense
 router.put('/:id', auth, async (req, res) => {
   try {
+    const updateData = { ...req.body };
+    if (updateData.amount) updateData.amount_encrypted = encryptField(String(updateData.amount));
+    if (updateData.description) updateData.description_encrypted = encryptField(updateData.description);
+
     const expense = await Expense.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
     if (!expense) return res.status(404).json({ success: false, error: 'Expense not found' });
@@ -105,15 +122,24 @@ router.get('/stats', auth, async (req, res) => {
 
     const stats = {
       totalExpenses: expenses.length,
-      totalAmount: expenses.reduce((s, e) => s + e.amount, 0),
-      thisMonthAmount: thisMonth.reduce((s, e) => s + e.amount, 0),
+      totalAmount: expenses.reduce((s, e) => {
+        const amt = e.amount_encrypted ? parseFloat(decryptField(e.amount_encrypted)) : e.amount;
+        return s + amt;
+      }, 0),
+      thisMonthAmount: thisMonth.reduce((s, e) => {
+        const amt = e.amount_encrypted ? parseFloat(decryptField(e.amount_encrypted)) : e.amount;
+        return s + amt;
+      }, 0),
       byCategory: {}
     };
 
     ['Food', 'Transport', 'Study', 'Entertainment'].forEach(cat => {
       stats.byCategory[cat] = thisMonth
         .filter(e => e.category === cat)
-        .reduce((s, e) => s + e.amount, 0);
+        .reduce((s, e) => {
+          const amt = e.amount_encrypted ? parseFloat(decryptField(e.amount_encrypted)) : e.amount;
+          return s + amt;
+        }, 0);
     });
 
     res.json({ success: true, stats });

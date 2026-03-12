@@ -65,6 +65,12 @@ const ExpenseRow = ({ expense, onDelete, categoryInfo }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
           <span className={`badge badge-${expense.category.toLowerCase()}`}>{expense.category}</span>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{dateStr}</span>
+          <span style={{ fontSize: '0.8rem', opacity: 0.8 }} title={expense.source === 'whatsapp' ? 'Logged via WhatsApp' : 'Logged via Web'}>
+            {expense.source === 'whatsapp' ? '📱' : '💻'}
+          </span>
+          {(expense.amount_encrypted || expense.description_encrypted) && (
+            <span style={{ fontSize: '0.8rem', opacity: 0.7 }} title="Encrypted at rest">🔒</span>
+          )}
           {expense.aiConfidence > 0 && (
             <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
               🤖 {Math.round(expense.aiConfidence * 100)}%
