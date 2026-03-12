@@ -1,39 +1,166 @@
-// AI Categorization Logic - Keyword-based with confidence scoring
 const CATEGORY_RULES = {
+
   Food: {
-    keywords: ['chai', 'tea', 'coffee', 'food', 'canteen', 'mess', 'biryani', 'dosa', 'idli',
+    keywords: [
+      'chai', 'tea', 'coffee', 'food', 'canteen', 'mess', 'biryani', 'dosa', 'idli',
       'lunch', 'dinner', 'breakfast', 'snack', 'pizza', 'burger', 'paratha', 'thali',
       'restaurant', 'hotel', 'swiggy', 'zomato', 'biscuit', 'samosa', 'roti', 'rice',
-      'vada', 'pav', 'maggi', 'noodles', 'milk', 'juice', 'lassi', 'water bottle'],
+      'vada', 'pav', 'maggi', 'noodles', 'milk', 'juice', 'lassi', 'water', 'sandwich'
+    ],
     budget: 2000,
     emoji: '🍽️',
     color: '#F6AD55'
   },
+
   Transport: {
-    keywords: ['bus', 'auto', 'ola', 'uber', 'rapido', 'petrol', 'metro', 'train', 'cab',
-      'rickshaw', 'cycle', 'bike', 'travel', 'fare', 'ticket', 'transport', 'commute',
-      'fuel', 'diesel', 'parking', 'toll'],
+    keywords: [
+      'bus', 'auto', 'ola', 'uber', 'rapido', 'petrol', 'metro', 'train', 'cab',
+      'rickshaw', 'cycle', 'bike', 'travel', 'fare', 'ticket', 'commute',
+      'fuel', 'diesel', 'parking', 'toll'
+    ],
     budget: 1500,
     emoji: '🚌',
     color: '#63B3ED'
   },
+
   Study: {
-    keywords: ['books', 'book', 'print', 'fees', 'pen', 'notes', 'stationery', 'photocopy',
-      'xerox', 'college', 'tuition', 'course', 'exam', 'lab', 'library', 'uniform',
-      'laptop', 'internet', 'wifi', 'subscription', 'udemy', 'coursera', 'highlighter',
-      'notebook', 'ruler', 'calculator'],
+    keywords: [
+      'book', 'books', 'print', 'fees', 'pen', 'notes', 'stationery', 'photocopy',
+      'xerox', 'college', 'tuition', 'course', 'exam', 'lab', 'library', 'assignment',
+      'project', 'notebook', 'ruler', 'calculator', 'highlighter'
+    ],
     budget: 3000,
     emoji: '📚',
     color: '#9F7AEA'
   },
+
+  Sports: {
+    keywords: [
+      'cricket', 'football', 'badminton', 'tennis', 'basketball', 'volleyball',
+      'gym', 'fitness', 'workout', 'sports', 'match', 'tournament', 'bat', 'ball',
+      'racket', 'shuttle', 'court', 'jersey'
+    ],
+    budget: 1200,
+    emoji: '🏸',
+    color: '#38B2AC'
+  },
+
   Entertainment: {
-    keywords: ['movie', 'netflix', 'hotstar', 'prime', 'spotify', 'game', 'gaming', 'cafe',
-      'outing', 'fun', 'party', 'concert', 'event', 'cricket', 'sport', 'gym',
-      'swim', 'bowling', 'arcade', 'mall', 'shopping', 'clothes', 'fashion'],
+    keywords: [
+      'movie', 'netflix', 'hotstar', 'prime', 'spotify', 'game', 'gaming',
+      'cinema', 'show', 'concert', 'event', 'party'
+    ],
     budget: 1000,
     emoji: '🎮',
     color: '#FC8181'
+  },
+
+  Shopping: {
+    keywords: [
+      'shopping', 'clothes', 'fashion', 'shirt', 'jeans', 'tshirt', 'jacket',
+      'shoes', 'sneakers', 'sandals', 'watch', 'bag', 'amazon', 'flipkart', 'mall'
+    ],
+    budget: 1500,
+    emoji: '🛍️',
+    color: '#ED64A6'
+  },
+
+  Health: {
+    keywords: [
+      'medicine', 'doctor', 'clinic', 'hospital', 'tablet', 'vitamin',
+      'pharmacy', 'checkup', 'treatment'
+    ],
+    budget: 800,
+    emoji: '💊',
+    color: '#48BB78'
+  },
+
+  PersonalCare: {
+    keywords: [
+      'haircut', 'salon', 'barber', 'shampoo', 'soap', 'toothpaste',
+      'skincare', 'cosmetics', 'perfume', 'grooming'
+    ],
+    budget: 600,
+    emoji: '🧴',
+    color: '#F687B3'
+  },
+
+  Bills: {
+    keywords: [
+      'electricity', 'bill', 'mobile recharge', 'recharge', 'data pack',
+      'internet bill', 'wifi bill', 'subscription fee'
+    ],
+    budget: 800,
+    emoji: '📄',
+    color: '#ECC94B'
+  },
+
+  Hostel: {
+    keywords: [
+      'hostel', 'rent', 'room', 'accommodation', 'pg', 'maintenance',
+      'room rent', 'hostel fee'
+    ],
+    budget: 3000,
+    emoji: '🏠',
+    color: '#4FD1C5'
+  },
+
+  Gadgets: {
+    keywords: [
+      'mobile', 'phone', 'charger', 'headphones', 'earphones',
+      'mouse', 'keyboard', 'usb', 'pendrive', 'tablet'
+    ],
+    budget: 1500,
+    emoji: '📱',
+    color: '#667EEA'
+  },
+
+  OnlineServices: {
+    keywords: [
+      'cloud', 'hosting', 'domain', 'software', 'license', 'app purchase',
+      'premium', 'online service'
+    ],
+    budget: 700,
+    emoji: '☁️',
+    color: '#4299E1'
+  },
+
+  Travel: {
+    keywords: [
+      'trip', 'vacation', 'tour', 'hotel stay', 'flight', 'holiday', 'journey'
+    ],
+    budget: 2500,
+    emoji: '✈️',
+    color: '#38A169'
+  },
+
+  Social: {
+    keywords: [
+      'gift', 'birthday', 'donation', 'celebration', 'treat', 'friends treat'
+    ],
+    budget: 800,
+    emoji: '🎁',
+    color: '#D53F8C'
+  },
+
+  Laundry: {
+    keywords: [
+      'laundry', 'washing', 'dry clean', 'iron', 'washing machine'
+    ],
+    budget: 300,
+    emoji: '🧺',
+    color: '#319795'
+  },
+
+  Miscellaneous: {
+    keywords: [
+      'misc', 'others', 'random', 'unknown'
+    ],
+    budget: 500,
+    emoji: '📦',
+    color: '#A0AEC0'
   }
+
 };
 
 /**
@@ -60,7 +187,7 @@ const categorize = (description) => {
 
   const bestCategory = Object.entries(scores).reduce((best, [cat, s]) =>
     s.score > best.score ? { category: cat, score: s.score } : best,
-    { category: 'Food', score: -1 }
+    { category: 'Miscellaneous', score: -1 }
   );
 
   const totalScore = Object.values(scores).reduce((s, v) => s + v.score, 0);
