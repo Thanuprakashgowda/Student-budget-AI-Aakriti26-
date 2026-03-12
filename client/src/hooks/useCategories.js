@@ -1,18 +1,42 @@
 import { useState, useEffect } from 'react';
 
-// Hardcoded defaults
+// Hardcoded defaults (matching shared/categories.js)
 const DEFAULT_CATEGORIES = {
-  Food: { emoji: '🍽️', color: '#FF8C00' },
-  Transport: { emoji: '🚌', color: '#00D4FF' },
-  Study: { emoji: '📚', color: '#00E676' },
-  Entertainment: { emoji: '🎮', color: '#FF5252' }
+  Food: { emoji: '🍽️', color: '#F6AD55' },
+  Transport: { emoji: '🚌', color: '#63B3ED' },
+  Study: { emoji: '📚', color: '#9F7AEA' },
+  Sports: { emoji: '🏸', color: '#38B2AC' },
+  Entertainment: { emoji: '🎮', color: '#FC8181' },
+  Shopping: { emoji: '🛍️', color: '#ED64A6' },
+  Health: { emoji: '💊', color: '#48BB78' },
+  PersonalCare: { emoji: '🧴', color: '#F687B3' },
+  Bills: { emoji: '📄', color: '#ECC94B' },
+  Hostel: { emoji: '🏠', color: '#4FD1C5' },
+  Gadgets: { emoji: '📱', color: '#667EEA' },
+  OnlineServices: { emoji: '☁️', color: '#4299E1' },
+  Travel: { emoji: '✈️', color: '#38A169' },
+  Social: { emoji: '🎁', color: '#D53F8C' },
+  Laundry: { emoji: '🧺', color: '#319795' },
+  Miscellaneous: { emoji: '📦', color: '#A0AEC0' }
 };
 
 const DEFAULT_BUDGETS = {
   Food: 2000,
   Transport: 1500,
   Study: 3000,
-  Entertainment: 1000
+  Sports: 1200,
+  Entertainment: 1000,
+  Shopping: 1500,
+  Health: 800,
+  PersonalCare: 600,
+  Bills: 800,
+  Hostel: 3000,
+  Gadgets: 1500,
+  OnlineServices: 700,
+  Travel: 2500,
+  Social: 800,
+  Laundry: 300,
+  Miscellaneous: 500
 };
 
 // Colors for custom categories
@@ -39,16 +63,34 @@ export const useCategories = (userId) => {
     // Load from local storage for this specific user
     try {
       const stored = localStorage.getItem(`sba_cats_${userId}`);
+      const defaultCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
+        name,
+        ...DEFAULT_CATEGORIES[name],
+        budget: DEFAULT_BUDGETS[name],
+        isCustom: false
+      }));
+
       if (stored) {
-        setCategories(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Migration: Add any missing default categories to existing user data
+        let merged = [...parsed];
+        let changed = false;
+        
+        defaultCats.forEach(def => {
+          if (!merged.find(c => c.name === def.name)) {
+            merged.push(def);
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          setCategories(merged);
+          localStorage.setItem(`sba_cats_${userId}`, JSON.stringify(merged));
+        } else {
+          setCategories(parsed);
+        }
       } else {
         // Initialize defaults for this user
-        const defaultCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
-          name,
-          ...DEFAULT_CATEGORIES[name],
-          budget: DEFAULT_BUDGETS[name],
-          isCustom: false
-        }));
         setCategories(defaultCats);
         localStorage.setItem(`sba_cats_${userId}`, JSON.stringify(defaultCats));
       }

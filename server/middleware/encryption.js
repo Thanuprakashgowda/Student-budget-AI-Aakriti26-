@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const algorithm = 'aes-256-cbc';
-const key = Buffer.from(process.env.ENCRYPTION_KEY || '32bytefallbackkeyhere1234567890123456789012345678', 'hex');
+const ENCRYPTION_KEY_RAW = process.env.ENCRYPTION_KEY || 'studentbudgetai_default_secret_pad_2026';
+const key = crypto.createHash('sha256').update(ENCRYPTION_KEY_RAW).digest();
 
 const encryptField = (text) => {
   if (typeof text !== 'string') text = String(text);

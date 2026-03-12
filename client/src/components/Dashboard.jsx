@@ -99,10 +99,11 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
   const savingsPct = Math.round((totalSaved / totalBudget) * 100);
 
   const pieData = Object.entries(totals).map(([name, value]) => ({ name, value }));
-  const barData = Object.entries(budgets).map(([cat]) => ({
+  const allCats = Array.from(new Set([...Object.keys(budgets), ...Object.keys(totals)]));
+  const barData = allCats.map(cat => ({
     category: cat,
     Spent: totals[cat] || 0,
-    Budget: budgets[cat],
+    Budget: budgets[cat] || 0,
   }));
 
   const recentExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
@@ -211,9 +212,10 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
             <h3 style={{ marginBottom: '20px', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               📈 Category Budgets
             </h3>
-            {Object.entries(budgets).map(([cat, budget]) => {
+            {allCats.map(cat => {
+              const budget = budgets[cat] || 0;
               const spent = totals[cat] || 0;
-              const pct = Math.min(100, Math.round((spent / budget) * 100));
+              const pct = budget > 0 ? Math.min(100, Math.round((spent / budget) * 100)) : (spent > 0 ? 100 : 0);
               const barColor = pct < 60 ? '#48BB78' : pct < 85 ? '#F6C90E' : '#FC8181';
               const info = categoryInfo[cat] || { emoji: '🏷️' };
               return (
