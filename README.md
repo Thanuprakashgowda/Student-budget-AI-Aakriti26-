@@ -3,14 +3,15 @@
 A full-stack, AI-powered personal finance tracker designed specifically for college and university students. Built tightly around modern MERN stack principles with advanced interactive features, ensuring students remain financially healthy while working towards Sustainable Development Goals (SDGs).
 
 ## ✨ Features
-- **Real-time Budget Dashboard**: Keep an eagle-eye on your monthly category budgets with live sync.
+- **🎯 Guided Budget Setup Wizard**: A seamless first-time user experience that forces explicit financial planning. No more "random" defaults—users define their total monthly allowance and allocate it with real-time feedback.
+- **⚙️ Editable Budgets & Scoped Overview**: Set and adjust monthly category limits directly from the dashboard. Your view remains clean by automatically hiding categories with zero spending.
+- **🛡️ Strict Budget Validation**: Built-in logic prevents your category-wise allocations from exceeding your total monthly budget, ensuring financial discipline from day one.
 - **🔒 Transparent Data Encryption**: Industry-standard **AES-256-CBC field-level encryption** for sensitive data (`amount`, `description`). Data is encrypted before storage and seamlessly decrypted for your dashboard.
 - **📱 WhatsApp Logging & Commands**: Log expenses instantly via WhatsApp (e.g., `150 chai`). Use the `delete` command to remove your most recent entry, and get friendly AI greetings.
-- **⚙️ Editable Budgets & Scoped Overview**: Set your own monthly category limits from the dashboard. Your view remains clean by only showing active categories you've spent in.
-- **Generative AI Chatbot (Google Gemini)**: Ask questions about your personal spending (`"Am I spending too much on transport?"`) and get deeply contextual financial assistance.
-- **Voice AI Expense Logging**: State your expenses out loud using SpeechRecognition and let the system categorize it.
-- **PDF Export Engine**: Generate official bank-statement style PDF reports.
-- **Student-Specific Categories**: Dedicated categories for 'Study', 'Transport', 'Food', 'Entertainment', plus custom categories.
+- **🤖 Generative AI Chatbot (Google Gemini)**: Ask questions about your personal spending (`"Am I spending too much on transport?"`) and get deeply contextual financial assistance based on your real data.
+- **🎤 Voice AI Expense Logging**: State your expenses out loud using SpeechRecognition and let the system intelligently categorize them.
+- **📊 PDF Export Engine**: Generate official bank-statement style monthly PDF reports for scholarship or parent reporting.
+- **🎓 Student-Specific Categories**: Optimized categories for 'Study', 'Transport', 'Food', 'Entertainment', plus the ability to add your own custom categories.
 
 ## 🚀 Tech Stack
 - Frontend: React.js, Recharts, jsPDF, Socket.IO Client
