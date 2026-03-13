@@ -121,12 +121,12 @@ const BudgetEditor = ({ categories, onUpdate, onClose }) => {
   );
 };
 
-const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, categoryInfo }) => {
+const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, categoryInfo, officialTotalBudget }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showBudgetEditor, setShowBudgetEditor] = useState(false);
 
   const totalSpent = Object.values(totals || {}).reduce((s, v) => s + (v || 0), 0);
-  const totalBudget = Object.values(budgets || {}).reduce((s, v) => s + (v || 0), 0);
+  const totalBudget = officialTotalBudget || Object.values(budgets || {}).reduce((s, v) => s + (v || 0), 0);
   const totalSaved = Math.max(0, totalBudget - totalSpent);
   const savingsPct = totalBudget > 0 ? Math.round((totalSaved / totalBudget) * 100) : 0;
 

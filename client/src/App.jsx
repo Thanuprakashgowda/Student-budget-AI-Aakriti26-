@@ -112,10 +112,94 @@ const AuthGate = () => {
 const TABS = ['Dashboard', 'Add Expense', 'SDG Impact'];
 const TAB_ICONS = ['📊', '➕', '🌐'];
 
+const BudgetSetupWizard = ({ onComplete, categories }) => {
+  const [total, setTotal] = useState('');
+  const [allocations, setAllocations] = useState({});
+  const [step, setStep] = useState(1);
+
+  const remaining = parseFloat(total || 0) - Object.values(allocations).reduce((a, b) => a + b, 0);
+
+  const handleComplete = () => {
+    if (remaining < 0) return alert("Total allocation cannot exceed your monthly budget!");
+    if (parseFloat(total) <= 0) return alert("Please enter a valid monthly budget!");
+    onComplete(parseFloat(total), allocations);
+  };
+
+  return (
+    <div className="modal-overlay animate-fade-in" style={{ zIndex: 2000 }}>
+      <div className="glass-card" style={{ width: '90%', maxWidth: '500px', padding: '32px', textAlign: 'center' }}>
+        {step === 1 ? (
+          <>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '16px' }}>💰 Set Your Monthly Budget</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>How much money do you want to manage this month?</p>
+            <input 
+              type="number" 
+              placeholder="e.g. 20000" 
+              className="expense-input" 
+              style={{ fontSize: '1.5rem', textAlign: 'center', marginBottom: '24px' }}
+              value={total}
+              onChange={(e) => setTotal(e.target.value)}
+            />
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => total > 0 && setStep(2)}>Next ➔</button>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🏷️ Allocate Categories</h2>
+            <div style={{ padding: '8px 16px', background: 'rgba(255,140,0,0.1)', borderRadius: '12px', marginBottom: '24px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Remaining to Allocate</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: remaining < 0 ? '#FC8181' : 'var(--amber)' }}>₹{remaining.toLocaleString()}</div>
+            </div>
+            
+            <div style={{ maxHeight: '40vh', overflowY: 'auto', textAlign: 'left', paddingRight: '12px' }}>
+              {categories.map(cat => (
+                <div key={cat.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{cat.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{cat.name}</div>
+                    <input 
+                      type="number" 
+                      className="expense-input" 
+                      style={{ padding: '8px' }}
+                      value={allocations[cat.name] || ''}
+                      onChange={(e) => setAllocations({ ...allocations, [cat.name]: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(1)}>Back</button>
+              <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleComplete}>Save My Budget</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MainApp = () => {
   const { user, logout } = useAuth();
   const { expenses, totals, loading, addExpense, deleteExpense } = useExpenses();
-  const { CATEGORY_BUDGETS, CATEGORY_INFO, categories, addCategory, categorize, categorizing, updateBudget } = useCategories(user?._id, user?.budgets);
+  const { CATEGORY_BUDGETS, CATEGORY_INFO, categories, addCategory, categorize, categorizing, updateBudget, totalBudget, updateAllBudgets } = useCategories(user?._id, user?.budgets, user?.totalMonthlyBudget);
+  
+  // Show wizard if totalBudget is 0
+  const [setupRequired, setSetupRequired] = useState(false);
+  
+  useEffect(() => {
+    if (totalBudget === 0 && user?._id && user?._id !== 'demo-user-id') {
+      setSetupRequired(true);
+    } else {
+      setSetupRequired(false);
+    }
+  }, [totalBudget, user?._id]);
+
+  const handleSetupComplete = async (newTotal, budgetsMap) => {
+    await updateAllBudgets(newTotal, budgetsMap);
+    setSetupRequired(false);
+    showToast("Budget setup complete! 🎯");
+  };
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [points, setPoints] = useState(() => parseInt(localStorage.getItem('sba_points') || '50'));
   const [streak] = useState(() => getStreak());
@@ -318,6 +402,7 @@ const MainApp = () => {
                   onUpdateBudget={updateBudget}
                   budgets={CATEGORY_BUDGETS}
                   categoryInfo={CATEGORY_INFO}
+                  officialTotalBudget={totalBudget}
                 />
                 <div style={{ marginTop: '24px' }}>
                   <BudgetAlerts totals={totals} budgets={CATEGORY_BUDGETS} categoryInfo={CATEGORY_INFO} />
@@ -348,6 +433,13 @@ const MainApp = () => {
       </footer>
 
       {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      
+      {setupRequired && (
+        <BudgetSetupWizard 
+          onComplete={handleSetupComplete} 
+          categories={categories} 
+        />
+      )}
     </div>
   );
 };

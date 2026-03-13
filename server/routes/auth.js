@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const protect = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'studentbudgetai_secret_key_2026';
 const JWT_EXPIRES = '7d';
@@ -147,30 +148,25 @@ router.get('/me', async (req, res) => {
 });
 
 // ── PUT /api/auth/budgets ──
-router.put('/budgets', async (req, res) => {
+router.put('/budgets', protect, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer '))
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
-
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    if (decoded.id === 'demo-user-id') {
+    if (req.user._id === 'demo-user-id') {
       return res.json({ success: true, message: 'Demo budgets skipped persistence' });
     }
 
     const User = require('../models/User');
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
-    // req.body should be { budgets: { CategoryName: Amount, ... } }
     if (req.body.budgets) {
       user.budgets = req.body.budgets;
-      await user.save();
     }
-
-    res.json({ success: true, budgets: user.budgets });
+    if (req.body.totalMonthlyBudget !== undefined) {
+      user.totalMonthlyBudget = req.body.totalMonthlyBudget;
+    }
+    
+    await user.save();
+    res.json({ success: true, budgets: user.budgets, totalMonthlyBudget: user.totalMonthlyBudget });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

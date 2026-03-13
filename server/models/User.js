@@ -35,12 +35,16 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true, // Allow multiple nulls if user doesn't provide phone
     trim: true,
-    match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
+    match: [/^(whatsapp:\+?)?[0-9()\-\s]{7,20}$/, 'Please enter a valid phone number']
   },
   budgets: {
     type: Map,
     of: Number,
     default: {}
+  },
+  totalMonthlyBudget: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

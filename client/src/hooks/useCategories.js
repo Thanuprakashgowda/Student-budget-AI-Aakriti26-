@@ -43,23 +43,26 @@ const DEFAULT_BUDGETS = {
 const CUSTOM_COLORS = ['#FFD740', '#E040FB', '#00E5FF', '#FF4081', '#76FF03', '#F50057'];
 const EMPTY_BUDGETS = {};
 
-export const useCategories = (userId, userBudgets = EMPTY_BUDGETS) => {
+export const useCategories = (userId, userBudgets = EMPTY_BUDGETS, totalMonthlyBudget = 0) => {
   const [categories, setCategories] = useState([]);
+  const [totalBudget, setTotalBudget] = useState(totalMonthlyBudget);
   const [categorizing, setCategorizing] = useState(false);
   
   // Load categories and budgets on mount/user change
   useEffect(() => {
     const initCats = () => {
       const dbBudgets = userBudgets || {};
+      const isSetup = totalMonthlyBudget > 0;
       
       const mergedCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
         name,
         ...DEFAULT_CATEGORIES[name],
-        budget: dbBudgets[name] !== undefined ? dbBudgets[name] : DEFAULT_BUDGETS[name],
+        // If system is not setup, use 0. Otherwise use db value or student default.
+        budget: !isSetup ? 0 : (dbBudgets[name] !== undefined ? dbBudgets[name] : DEFAULT_BUDGETS[name]),
         isCustom: false
       }));
 
-      // Find any custom categories in local storage (keeping those local for now or can sync later)
+      // Find any custom categories in local storage
       try {
         const stored = localStorage.getItem(`sba_custom_cats_${userId}`);
         if (stored) {
@@ -74,26 +77,21 @@ export const useCategories = (userId, userBudgets = EMPTY_BUDGETS) => {
     };
 
     setCategories(initCats());
-  }, [userId, JSON.stringify(userBudgets)]);
+    setTotalBudget(totalMonthlyBudget);
+  }, [userId, JSON.stringify(userBudgets), totalMonthlyBudget]);
 
-  const saveToBackend = async (categoryName, budget) => {
+  const saveToBackend = async (updates) => {
     if (!userId || userId === 'demo-user-id') return;
     
     try {
       const token = localStorage.getItem('sba_token');
-      // Construct current budget map
-      const currentMap = categories.reduce((acc, c) => {
-        acc[c.name] = c.name === categoryName ? budget : c.budget;
-        return acc;
-      }, {});
-
       await fetch('/api/auth/budgets', {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ budgets: currentMap })
+        body: JSON.stringify(updates)
       });
     } catch (e) {
       console.error("Sync error", e);
@@ -116,8 +114,24 @@ export const useCategories = (userId, userBudgets = EMPTY_BUDGETS) => {
 
   const updateBudget = async (name, newBudget) => {
     const val = parseFloat(newBudget) || 0;
-    setCategories(prev => prev.map(c => c.name === name ? { ...c, budget: val } : c));
-    await saveToBackend(name, val);
+    const newCats = categories.map(c => c.name === name ? { ...c, budget: val } : c);
+    setCategories(newCats);
+    
+    const budgetsMap = newCats.reduce((acc, c) => {
+      acc[c.name] = c.budget;
+      return acc;
+    }, {});
+    
+    await saveToBackend({ budgets: budgetsMap });
+  };
+
+  const updateAllBudgets = async (newTotal, budgetsMap) => {
+    setTotalBudget(newTotal);
+    setCategories(prev => prev.map(c => ({
+      ...c,
+      budget: budgetsMap[c.name] !== undefined ? budgetsMap[c.name] : c.budget
+    })));
+    await saveToBackend({ totalMonthlyBudget: newTotal, budgets: budgetsMap });
   };
 
   const categorize = async (description) => {
