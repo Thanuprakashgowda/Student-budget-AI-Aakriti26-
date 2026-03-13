@@ -25,6 +25,7 @@ const io = new Server(server, {
 
 app.use(helmet()); // secure HTTP headers
 app.use(mongoSanitize()); // prevent MongoDB injection
+app.set('trust proxy', 1); // fix express-rate-limit proxy error
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -56,19 +57,20 @@ app.set('dbState', dbState);
    DATABASE CONNECTION
 ========================= */
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/studentbudgetai';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studentbudgetai';
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => {
-    console.warn(
-      '⚠️ MongoDB not connected, using in-memory fallback:',
-      err.message
-    );
+async function connectToData() {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ MongoDB connected successfully');
+  } catch (err) {
+    console.warn('⚠️ MongoDB connection failed:', err.message);
+    console.log('🔄 Reverting to in-memory fallback for this session');
     setupInMemoryMode();
-  });
+  }
+}
+
+connectToData();
 
 /* =========================
    ROUTES
@@ -132,7 +134,7 @@ function setupInMemoryMode() {
   dbState.expenses = sampleData.map((e) => ({
     ...e,
     _id: String(dbState.nextId++),
-    userId: 'demo-user',
+    userId: 'demo-user-id',
     createdAt: new Date()
   }));
 
@@ -160,7 +162,7 @@ function setupInMemoryMode() {
       ...req.body,
       amount,
       _id: String(dbState.nextId++),
-      userId: 'demo-user',
+      userId: 'demo-user-id',
       createdAt: new Date(),
       date: req.body.date ? new Date(req.body.date) : new Date()
     };

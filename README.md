@@ -5,7 +5,8 @@ A full-stack, AI-powered personal finance tracker designed specifically for coll
 ## ✨ Features
 - **Real-time Budget Dashboard**: Keep an eagle-eye on your monthly category budgets with live sync.
 - **🔒 Transparent Data Encryption**: Industry-standard **AES-256-CBC field-level encryption** for sensitive data (`amount`, `description`). Data is encrypted before storage and seamlessly decrypted for your dashboard.
-- **📱 WhatsApp Logging & Commands**: Log expenses instantly via WhatsApp (e.g., `150 chai`). Use the `delete` command to remove your most recent entry instantly.
+- **📱 WhatsApp Logging & Commands**: Log expenses instantly via WhatsApp (e.g., `150 chai`). Use the `delete` command to remove your most recent entry, and get friendly AI greetings.
+- **⚙️ Editable Budgets & Scoped Overview**: Set your own monthly category limits from the dashboard. Your view remains clean by only showing active categories you've spent in.
 - **Generative AI Chatbot (Google Gemini)**: Ask questions about your personal spending (`"Am I spending too much on transport?"`) and get deeply contextual financial assistance.
 - **Voice AI Expense Logging**: State your expenses out loud using SpeechRecognition and let the system categorize it.
 - **PDF Export Engine**: Generate official bank-statement style PDF reports.

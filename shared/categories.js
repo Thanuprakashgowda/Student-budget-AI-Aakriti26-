@@ -18,7 +18,7 @@ const CATEGORY_RULES = {
       'rickshaw', 'cycle', 'bike', 'travel', 'fare', 'ticket', 'commute',
       'fuel', 'diesel', 'parking', 'toll'
     ],
-    budget: 1500,
+    budget: 1000,
     emoji: '🚌',
     color: '#63B3ED'
   },
@@ -29,7 +29,7 @@ const CATEGORY_RULES = {
       'xerox', 'college', 'tuition', 'course', 'exam', 'lab', 'library', 'assignment',
       'project', 'notebook', 'ruler', 'calculator', 'highlighter'
     ],
-    budget: 3000,
+    budget: 500,
     emoji: '📚',
     color: '#9F7AEA'
   },
@@ -40,7 +40,7 @@ const CATEGORY_RULES = {
       'gym', 'fitness', 'workout', 'sports', 'match', 'tournament', 'bat', 'ball',
       'racket', 'shuttle', 'court', 'jersey'
     ],
-    budget: 1200,
+    budget: 200,
     emoji: '🏸',
     color: '#38B2AC'
   },
@@ -100,7 +100,7 @@ const CATEGORY_RULES = {
       'hostel', 'rent', 'room', 'accommodation', 'pg', 'maintenance',
       'room rent', 'hostel fee'
     ],
-    budget: 3000,
+    budget: 0,
     emoji: '🏠',
     color: '#4FD1C5'
   },
@@ -110,7 +110,7 @@ const CATEGORY_RULES = {
       'mobile', 'phone', 'charger', 'headphones', 'earphones',
       'mouse', 'keyboard', 'usb', 'pendrive', 'tablet'
     ],
-    budget: 1500,
+    budget: 0,
     emoji: '📱',
     color: '#667EEA'
   },
@@ -120,25 +120,17 @@ const CATEGORY_RULES = {
       'cloud', 'hosting', 'domain', 'software', 'license', 'app purchase',
       'premium', 'online service'
     ],
-    budget: 700,
+    budget: 0,
     emoji: '☁️',
     color: '#4299E1'
   },
 
-  Travel: {
-    keywords: [
-      'trip', 'vacation', 'tour', 'hotel stay', 'flight', 'holiday', 'journey'
-    ],
-    budget: 2500,
-    emoji: '✈️',
-    color: '#38A169'
-  },
 
   Social: {
     keywords: [
       'gift', 'birthday', 'donation', 'celebration', 'treat', 'friends treat'
     ],
-    budget: 800,
+    budget: 0,
     emoji: '🎁',
     color: '#D53F8C'
   },
@@ -147,7 +139,7 @@ const CATEGORY_RULES = {
     keywords: [
       'laundry', 'washing', 'dry clean', 'iron', 'washing machine'
     ],
-    budget: 300,
+    budget: 0,
     emoji: '🧺',
     color: '#319795'
   },
@@ -156,7 +148,7 @@ const CATEGORY_RULES = {
     keywords: [
       'misc', 'others', 'random', 'unknown'
     ],
-    budget: 500,
+    budget: 0,
     emoji: '📦',
     color: '#A0AEC0'
   }

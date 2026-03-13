@@ -90,43 +90,88 @@ const ExpenseRow = ({ expense, onDelete, categoryInfo }) => {
   );
 };
 
-const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
+const BudgetEditor = ({ categories, onUpdate, onClose }) => {
+  return (
+    <div className="modal-overlay animate-fade-in" style={{ zIndex: 1000 }}>
+      <div className="glass-card" style={{ width: '90%', maxWidth: '450px', padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>⚙️ Set Category Budgets</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.5rem' }}>&times;</button>
+        </div>
+        <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px' }}>
+          {categories.map(cat => (
+            <div key={cat.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '1.2rem', width: '30px' }}>{cat.emoji}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{cat.name}</div>
+                <input
+                  type="number"
+                  defaultValue={cat.budget}
+                  onBlur={(e) => onUpdate(cat.name, e.target.value)}
+                  className="expense-input"
+                  style={{ padding: '8px', marginTop: '4px' }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <button className="btn btn-primary" onClick={onClose} style={{ width: '100%', marginTop: '20px', padding: '12px' }}>Done</button>
+      </div>
+    </div>
+  );
+};
+
+const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, categoryInfo }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [showBudgetEditor, setShowBudgetEditor] = useState(false);
 
-  const totalSpent = Object.values(totals).reduce((s, v) => s + v, 0);
-  const totalBudget = Object.values(budgets).reduce((s, v) => s + v, 0);
-  const totalSaved = totalBudget - totalSpent;
-  const savingsPct = Math.round((totalSaved / totalBudget) * 100);
+  const totalSpent = Object.values(totals || {}).reduce((s, v) => s + (v || 0), 0);
+  const totalBudget = Object.values(budgets || {}).reduce((s, v) => s + (v || 0), 0);
+  const totalSaved = Math.max(0, totalBudget - totalSpent);
+  const savingsPct = totalBudget > 0 ? Math.round((totalSaved / totalBudget) * 100) : 0;
 
-  const pieData = Object.entries(totals).map(([name, value]) => ({ name, value }));
-  const allCats = Array.from(new Set([...Object.keys(budgets), ...Object.keys(totals)]));
-  const barData = allCats.map(cat => ({
+  const pieData = Object.entries(totals).filter(([_, v]) => v > 0).map(([name, value]) => ({ name, value }));
+  
+  // Categorize for rendering: only show categories with spending > 0
+  const activeCats = Object.entries(totals)
+    .filter(([_, spent]) => spent > 0)
+    .map(([name]) => name);
+
+  const barData = activeCats.map(cat => ({
     category: cat,
     Spent: totals[cat] || 0,
     Budget: budgets[cat] || 0,
   }));
 
   const recentExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+  
+  // Categories for the editor
+  const allCategoriesList = Object.keys(categoryInfo).map(name => ({
+    name,
+    emoji: categoryInfo[name].emoji,
+    budget: budgets[name] || 0
+  }));
 
   const exportStatementPDF = () => {
     const doc = new jsPDF();
-    
+    // ... same as before
+
     // Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(255, 140, 0); // Amber
     doc.text("StudentBudgetAI", 14, 20);
-    
+
     doc.setFontSize(14);
     doc.setTextColor(40);
     doc.text("Official Expense Statement", 14, 30);
-    
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 38);
     doc.text(`Total Lifetime Expenses: ${expenses.length} transactions`, 14, 44);
-    doc.text(`Total Lifetime Spent: Rs. ${Object.values(totals).reduce((a,b)=>a+b, 0).toLocaleString()}`, 14, 50);
+    doc.text(`Total Lifetime Spent: Rs. ${Object.values(totals).reduce((a, b) => a + b, 0).toLocaleString()}`, 14, 50);
 
     // Table Data
     const tableColumn = ["Date", "Description", "Category", "Amount (INR)"];
@@ -146,7 +191,7 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
     });
 
     let finalY = 60;
-    
+
     if (tableRows.length > 0) {
       autoTable(doc, {
         head: [tableColumn],
@@ -161,7 +206,7 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
     } else {
       doc.text("No expenses recorded yet.", 14, 60);
     }
-    
+
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(150);
@@ -186,8 +231,8 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
             </button>
           ))}
         </div>
-        
-        <button 
+
+        <button
           onClick={exportStatementPDF}
           className="btn btn-ghost"
           style={{ padding: '8px 16px', fontSize: '0.85rem', border: '1px solid var(--amber)', color: 'var(--amber)' }}
@@ -209,10 +254,21 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
 
           {/* Category progress */}
           <div className="glass-card animate-fade-in" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              📈 Category Budgets
-            </h3>
-            {allCats.map(cat => {
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                📈 Category Budgets
+              </h3>
+              <button
+                onClick={() => setShowBudgetEditor(true)}
+                className="btn btn-ghost"
+                style={{ fontSize: '0.8rem', padding: '4px 10px', color: 'var(--amber)', border: '1px solid var(--amber)' }}
+              >
+                ⚙️ Adjust
+              </button>
+            </div>
+            {activeCats.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '10px' }}>No spending yet</p>
+            ) : activeCats.map(cat => {
               const budget = budgets[cat] || 0;
               const spent = totals[cat] || 0;
               const pct = budget > 0 ? Math.min(100, Math.round((spent / budget) * 100)) : (spent > 0 ? 100 : 0);
@@ -291,40 +347,40 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
-                <XAxis 
-                  dataKey="category" 
+                <XAxis
+                  dataKey="category"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 500 }} 
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 500 }}
                   dy={10}
                 />
-                <YAxis 
+                <YAxis
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 />
-                <Tooltip 
-                  content={<CustomTooltip />} 
+                <Tooltip
+                  content={<CustomTooltip />}
                   cursor={{ fill: 'rgba(255,255,255,0.03)', radius: [8, 8, 0, 0] }}
                 />
-                <Legend 
-                  verticalAlign="top" 
-                  align="right" 
+                <Legend
+                  verticalAlign="top"
+                  align="right"
                   iconType="circle"
                   wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 600 }}
                   formatter={(value) => <span style={{ color: 'var(--text-secondary)', paddingLeft: '4px' }}>{value}</span>}
                 />
-                <Bar 
-                  dataKey="Budget" 
-                  fill="url(#budgetGradient)" 
-                  radius={[6, 6, 0, 0]} 
+                <Bar
+                  dataKey="Budget"
+                  fill="url(#budgetGradient)"
+                  radius={[6, 6, 0, 0]}
                   barSize={32}
                   stroke="rgba(255,255,255,0.1)"
                   strokeWidth={1}
                 />
-                <Bar 
-                  dataKey="Spent" 
-                  radius={[6, 6, 0, 0]} 
+                <Bar
+                  dataKey="Spent"
+                  radius={[6, 6, 0, 0]}
                   barSize={32}
                   activeBar={{ filter: 'brightness(1.2) drop-shadow(0 0 8px rgba(255,140,0,0.3))' }}
                 >
@@ -350,6 +406,14 @@ const Dashboard = ({ expenses, totals, onDelete, budgets, categoryInfo }) => {
             ))
           }
         </div>
+      )}
+
+      {showBudgetEditor && (
+        <BudgetEditor
+          categories={allCategoriesList}
+          onUpdate={onUpdateBudget}
+          onClose={() => setShowBudgetEditor(false)}
+        />
       )}
     </div>
   );

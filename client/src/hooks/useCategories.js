@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // Hardcoded defaults (matching shared/categories.js)
 const DEFAULT_CATEGORIES = {
@@ -41,87 +41,83 @@ const DEFAULT_BUDGETS = {
 
 // Colors for custom categories
 const CUSTOM_COLORS = ['#FFD740', '#E040FB', '#00E5FF', '#FF4081', '#76FF03', '#F50057'];
+const EMPTY_BUDGETS = {};
 
-export const useCategories = (userId) => {
+export const useCategories = (userId, userBudgets = EMPTY_BUDGETS) => {
   const [categories, setCategories] = useState([]);
   const [categorizing, setCategorizing] = useState(false);
   
   // Load categories and budgets on mount/user change
   useEffect(() => {
-    if (!userId) {
-      // Setup defaults if no user
-      const defaultCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
+    const initCats = () => {
+      const dbBudgets = userBudgets || {};
+      
+      const mergedCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
         name,
         ...DEFAULT_CATEGORIES[name],
-        budget: DEFAULT_BUDGETS[name],
-        isCustom: false
-      }));
-      setCategories(defaultCats);
-      return;
-    }
-
-    // Load from local storage for this specific user
-    try {
-      const stored = localStorage.getItem(`sba_cats_${userId}`);
-      const defaultCats = Object.keys(DEFAULT_CATEGORIES).map(name => ({
-        name,
-        ...DEFAULT_CATEGORIES[name],
-        budget: DEFAULT_BUDGETS[name],
+        budget: dbBudgets[name] !== undefined ? dbBudgets[name] : DEFAULT_BUDGETS[name],
         isCustom: false
       }));
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Migration: Add any missing default categories to existing user data
-        let merged = [...parsed];
-        let changed = false;
-        
-        defaultCats.forEach(def => {
-          if (!merged.find(c => c.name === def.name)) {
-            merged.push(def);
-            changed = true;
-          }
-        });
-
-        if (changed) {
-          setCategories(merged);
-          localStorage.setItem(`sba_cats_${userId}`, JSON.stringify(merged));
-        } else {
-          setCategories(parsed);
+      // Find any custom categories in local storage (keeping those local for now or can sync later)
+      try {
+        const stored = localStorage.getItem(`sba_custom_cats_${userId}`);
+        if (stored) {
+          const custom = JSON.parse(stored);
+          return [...mergedCats, ...custom];
         }
-      } else {
-        // Initialize defaults for this user
-        setCategories(defaultCats);
-        localStorage.setItem(`sba_cats_${userId}`, JSON.stringify(defaultCats));
+      } catch (e) {
+        console.error("Local custom cats error", e);
       }
-    } catch {
-      console.error("Failed to load categories");
-    }
-  }, [userId]);
+      
+      return mergedCats;
+    };
 
-  const saveCategories = (newCats) => {
-    setCategories(newCats);
-    if (userId) {
-      localStorage.setItem(`sba_cats_${userId}`, JSON.stringify(newCats));
+    setCategories(initCats());
+  }, [userId, JSON.stringify(userBudgets)]);
+
+  const saveToBackend = async (categoryName, budget) => {
+    if (!userId || userId === 'demo-user-id') return;
+    
+    try {
+      const token = localStorage.getItem('sba_token');
+      // Construct current budget map
+      const currentMap = categories.reduce((acc, c) => {
+        acc[c.name] = c.name === categoryName ? budget : c.budget;
+        return acc;
+      }, {});
+
+      await fetch('/api/auth/budgets', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ budgets: currentMap })
+      });
+    } catch (e) {
+      console.error("Sync error", e);
     }
   };
 
   const addCategory = (name, budget, emoji) => {
-    if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) return false; // Exists
-    
-    // Pick random neon color for custom cat
+    if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) return false;
     const color = CUSTOM_COLORS[categories.length % CUSTOM_COLORS.length];
+    const newCat = { name, budget: parseFloat(budget) || 0, emoji: emoji || '🏷️', color, isCustom: true };
+    const newCats = [...categories, newCat];
+    setCategories(newCats);
     
-    const newCats = [...categories, {
-      name, budget, emoji: emoji || '🏷️', color, isCustom: true
-    }];
-    saveCategories(newCats);
+    if (userId) {
+      const customOnly = newCats.filter(c => c.isCustom);
+      localStorage.setItem(`sba_custom_cats_${userId}`, JSON.stringify(customOnly));
+    }
     return true;
   };
 
-  const updateBudget = (name, newBudget) => {
-    const newCats = categories.map(c => c.name === name ? { ...c, budget: newBudget } : c);
-    saveCategories(newCats);
+  const updateBudget = async (name, newBudget) => {
+    const val = parseFloat(newBudget) || 0;
+    setCategories(prev => prev.map(c => c.name === name ? { ...c, budget: val } : c));
+    await saveToBackend(name, val);
   };
 
   const categorize = async (description) => {
@@ -169,23 +165,27 @@ export const useCategories = (userId) => {
     return null;
   };
 
-  // Turn array into object format for other components
-  const totalsFormat = categories.reduce((acc, cat) => {
-    acc[cat.name] = cat.budget;
-    return acc;
-  }, {});
+  // Memoize derivation to prevent infinite loops in consumers
+  const totalsFormat = useMemo(() => {
+    return categories.reduce((acc, cat) => {
+      acc[cat.name] = cat.budget;
+      return acc;
+    }, {});
+  }, [categories]);
 
-  const infoFormat = categories.reduce((acc, cat) => {
-    acc[cat.name] = { color: cat.color, emoji: cat.emoji };
-    return acc;
-  }, {});
+  const infoFormat = useMemo(() => {
+    return categories.reduce((acc, cat) => {
+      acc[cat.name] = { color: cat.color, emoji: cat.emoji };
+      return acc;
+    }, {});
+  }, [categories]);
 
   return {
-    categories,              // Array format for UI [{name, budget, emoji, color}]
+    categories,              
     addCategory,
     updateBudget,
-    CATEGORY_BUDGETS: totalsFormat, // For BudgetAlerts/Dashboard
-    CATEGORY_INFO: infoFormat,      // For finding color/emoji by name
+    CATEGORY_BUDGETS: totalsFormat, 
+    CATEGORY_INFO: infoFormat,      
     categorize,
     categorizing
   };

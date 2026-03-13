@@ -115,7 +115,7 @@ const TAB_ICONS = ['📊', '➕', '🌐'];
 const MainApp = () => {
   const { user, logout } = useAuth();
   const { expenses, totals, loading, addExpense, deleteExpense } = useExpenses();
-  const { CATEGORY_BUDGETS, CATEGORY_INFO, categories, addCategory, categorize, categorizing } = useCategories(user?._id);
+  const { CATEGORY_BUDGETS, CATEGORY_INFO, categories, addCategory, categorize, categorizing, updateBudget } = useCategories(user?._id, user?.budgets);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [points, setPoints] = useState(() => parseInt(localStorage.getItem('sba_points') || '50'));
   const [streak] = useState(() => getStreak());
@@ -315,6 +315,7 @@ const MainApp = () => {
                   expenses={expenses}
                   totals={totals}
                   onDelete={handleDelete}
+                  onUpdateBudget={updateBudget}
                   budgets={CATEGORY_BUDGETS}
                   categoryInfo={CATEGORY_INFO}
                 />

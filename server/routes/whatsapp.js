@@ -4,188 +4,101 @@ const Expense = require('../models/Expense');
 const { encryptField } = require('../middleware/encryption');
 const { categorize } = require('../../shared/categories');
 const mongoose = require('mongoose');
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
 
 const router = express.Router();
 
 router.post('/webhook', async (req, res) => {
 
   const { Body, From } = req.body;
+
+  console.log("Incoming WhatsApp:", Body, From);
+
   const io = req.app.get('io');
   const command = Body.trim().toLowerCase();
 
-  const client = process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN
-    ? twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN)
-    : null;
+  const client = twilio(
+    process.env.TWILIO_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  );
 
   /*
-  =================================
-  REPORT / EXPORT COMMAND
-  =================================
-  */
-
-  if (command === 'report' || command === 'export') {
-
-    try {
-
-      let expenses = [];
-
-      if (mongoose.connection.readyState === 1) {
-        expenses = await Expense.find({ phone: From }).sort({ date: -1 });
-      } else {
-        const dbState = req.app.get('dbState') || { expenses: [] };
-        expenses = dbState.expenses.filter(e => e.phone === From);
-      }
-
-      if (!expenses.length) {
-
-        if (client) {
-          await client.messages.create({
-            from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-            to: From,
-            body: '❌ No expenses found to generate report.'
-          });
-        }
-
-        return res.sendStatus(200);
-      }
-
-      const reportsDir = path.join(__dirname, '../reports');
-
-      if (!fs.existsSync(reportsDir)) {
-        fs.mkdirSync(reportsDir);
-      }
-
-      const fileName = `report_${Date.now()}.pdf`;
-      const filePath = path.join(reportsDir, fileName);
-
-      const doc = new PDFDocument();
-
-      doc.pipe(fs.createWriteStream(filePath));
-
-      doc.fontSize(18).text('StudentBudgetAI Expense Report');
-      doc.moveDown();
-
-      let total = 0;
-
-      expenses.forEach(e => {
-
-        const line = `${new Date(e.date).toDateString()} | ₹${e.amount} | ${e.category} | ${e.description}`;
-
-        doc.fontSize(12).text(line);
-
-        total += Number(e.amount) || 0;
-      });
-
-      doc.moveDown();
-      doc.fontSize(14).text(`Total Spent: ₹${total}`);
-
-      doc.end();
-
-      const publicUrl = `${process.env.SERVER_URL}/reports/${fileName}`;
-
-      if (client) {
-
-        await client.messages.create({
-          from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-          to: From,
-          body: '📄 Your expense report',
-          mediaUrl: [publicUrl]
-        });
-
-      }
-
-    } catch (err) {
-      console.error('Report generation error:', err);
-    }
-
-    return res.sendStatus(200);
-  }
-
-  /*
-  =================================
-  DELETE COMMAND
-  =================================
+  ============================
+  DELETE LAST EXPENSE
+  ============================
   */
 
   if (command === 'delete' || command === 'remove') {
 
-    let deletedId = null;
-
     try {
+
+      let deletedExpense;
 
       if (mongoose.connection.readyState === 1) {
 
-        const lastExpense = await Expense.findOneAndDelete(
+        deletedExpense = await Expense.findOneAndDelete(
           { phone: From },
           { sort: { date: -1 } }
         );
 
-        if (lastExpense) deletedId = lastExpense._id;
-
       } else {
 
-        const dbState = req.app.get('dbState') || { expenses: [] };
+        const dbState = req.app.get('dbState');
 
         const idx = dbState.expenses.findIndex(e => e.phone === From);
 
         if (idx !== -1) {
-          deletedId = dbState.expenses[idx]._id;
+          deletedExpense = dbState.expenses[idx];
           dbState.expenses.splice(idx, 1);
         }
 
       }
 
-      if (deletedId) {
+      if (deletedExpense) {
 
-        if (io) io.emit('expense:deleted', { id: deletedId });
-
-        if (client) {
-          await client.messages.create({
-            from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-            to: From,
-            body: '🗑️ Last expense deleted successfully! Dashboard updated.'
-          });
+        if (io) {
+          io.emit('expense:deleted', { id: deletedExpense._id });
         }
+
+        await client.messages.create({
+          from: process.env.TWILIO_WHATSAPP_NUMBER,
+          to: From,
+          body: '🗑️ Last expense deleted successfully.'
+        });
 
       } else {
 
-        if (client) {
-          await client.messages.create({
-            from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-            to: From,
-            body: '❌ No expenses found to delete.'
-          });
-        }
+        await client.messages.create({
+          from: process.env.TWILIO_WHATSAPP_NUMBER,
+          to: From,
+          body: '❌ No expenses found to delete.'
+        });
 
       }
 
     } catch (err) {
-      console.error('WhatsApp deletion error:', err);
+
+      console.error("Delete error:", err);
+
     }
 
     return res.sendStatus(200);
   }
 
   /*
-  =================================
-  ADD EXPENSE
-  =================================
+  ============================
+  ADD NEW EXPENSE
+  ============================
   */
 
   const match = Body.match(/(\d+(?:\.\d+)?)\s*(.*)/);
 
   if (!match) {
 
-    if (client) {
-      await client.messages.create({
-        from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-        to: From,
-        body: 'Format: "150 chai" or "80 auto"'
-      });
-    }
+    await client.messages.create({
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: From,
+      body: 'Format: "150 chai" or "80 auto"'
+    });
 
     return res.sendStatus(200);
   }
@@ -219,6 +132,12 @@ router.post('/webhook', async (req, res) => {
 
   try {
 
+    /*
+    ============================
+    SAVE EXPENSE
+    ============================
+    */
+
     if (mongoose.connection.readyState === 1) {
 
       savedExpense = new Expense(expenseData);
@@ -226,9 +145,9 @@ router.post('/webhook', async (req, res) => {
 
     } else {
 
-      console.warn('⚠️ MongoDB disconnected, saving WhatsApp entry in-memory');
+      console.warn('⚠️ MongoDB not connected, using in-memory mode');
 
-      const dbState = req.app.get('dbState') || { expenses: [] };
+      const dbState = req.app.get('dbState');
 
       savedExpense = {
         ...expenseData,
@@ -239,23 +158,38 @@ router.post('/webhook', async (req, res) => {
 
     }
 
+    /*
+    ============================
+    UPDATE DASHBOARD
+    ============================
+    */
+
     if (io && savedExpense) {
       io.emit('expense:created', savedExpense);
     }
 
-    if (client) {
-      await client.messages.create({
-        from: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
-        to: From,
-        body: `✅ ₹${rawAmount} ${categoryResult.category} logged! Dashboard updated.`
-      });
-    }
+    /*
+    ============================
+    WHATSAPP CONFIRMATION
+    ============================
+    */
+
+    await client.messages.create({
+
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: From,
+      body: `✅ Expense saved: ₹${rawAmount} (${categoryResult.category})`
+
+    });
 
   } catch (err) {
-    console.error('WhatsApp logging error:', err);
+
+    console.error("Expense save error:", err);
+
   }
 
   res.sendStatus(200);
+
 });
 
 module.exports = router;

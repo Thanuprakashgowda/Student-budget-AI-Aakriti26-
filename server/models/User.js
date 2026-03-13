@@ -29,6 +29,18 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: ''   // initials-based avatar on frontend
+  },
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true, // Allow multiple nulls if user doesn't provide phone
+    trim: true,
+    match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
+  },
+  budgets: {
+    type: Map,
+    of: Number,
+    default: {}
   }
 }, { timestamps: true });
 
