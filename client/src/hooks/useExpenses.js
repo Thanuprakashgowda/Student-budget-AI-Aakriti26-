@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import io from 'socket.io-client';
 
 const API_BASE = '/api';
-let socket = null;
 
 export const useExpenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -42,27 +40,7 @@ export const useExpenses = () => {
 
   useEffect(() => {
     fetchExpenses();
-
-    // Setup Socket.io
-    try {
-      socket = io('http://localhost:5000', { timeout: 3000 });
-      socket.on('expense:created', (exp) => {
-        setExpenses(prev => {
-          if (prev.some(e => e._id === exp._id)) return prev;
-          return [exp, ...prev];
-        });
-      });
-      socket.on('expense:updated', (exp) => {
-        setExpenses(prev => prev.map(e => e._id === exp._id ? exp : e));
-      });
-      socket.on('expense:deleted', ({ id }) => {
-        setExpenses(prev => prev.filter(e => e._id !== id));
-      });
-    } catch { /* no socket */ }
-
-    return () => { if (socket) socket.disconnect(); };
   }, []); // eslint-disable-line
-
   useEffect(() => { computeTotals(expenses); }, [expenses, computeTotals]);
 
   const addExpense = useCallback(async (expenseData) => {

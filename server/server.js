@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+// Socket.io removed for Vercel deployment
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -10,14 +9,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }
-});
+// HTTP server and Socket.io instances removed
 
 /* =========================
    SECURITY MIDDLEWARE
@@ -42,8 +34,7 @@ app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001'] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Make io accessible in routes
-app.set('io', io);
+// Removed socket.io context
 
 // In-memory global state for demo mode
 const dbState = {
@@ -169,8 +160,6 @@ function setupInMemoryMode() {
 
     dbState.expenses.unshift(expense);
 
-    io.emit('expense:created', expense);
-
     res.status(201).json({
       success: true,
       expense
@@ -188,8 +177,6 @@ function setupInMemoryMode() {
 
     dbState.expenses.splice(idx, 1);
 
-    io.emit('expense:deleted', { id: req.params.id });
-
     res.json({
       success: true,
       message: 'Deleted'
@@ -197,17 +184,7 @@ function setupInMemoryMode() {
   });
 }
 
-/* =========================
-   SOCKET.IO
-========================= */
-
-io.on('connection', (socket) => {
-  console.log('🔌 Client connected:', socket.id);
-
-  socket.on('disconnect', () =>
-    console.log('🔌 Client disconnected:', socket.id)
-  );
-});
+// Socket.io listeners removed
 
 /* =========================
    SERVER START
@@ -215,10 +192,13 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`\n🚀 StudentBudgetAI Server running on port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-  console.log(`❤️ Health: http://localhost:${PORT}/api/health\n`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 StudentBudgetAI Server running locally on port ${PORT}`);
+    console.log(`📡 API: http://localhost:${PORT}/api`);
+    console.log(`❤️ Health: http://localhost:${PORT}/api/health\n`);
+  });
+}
 
-module.exports = { app, server };
+// Export the app for Vercel Serverless Functions
+module.exports = app;

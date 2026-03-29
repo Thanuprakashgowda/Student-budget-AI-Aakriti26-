@@ -62,10 +62,7 @@ router.post('/', auth, async (req, res) => {
     });
     await expense.save();
 
-    // Emit real-time update
-    const io = req.app.get('io');
-    if (io) io.emit('expense:created', expense);
-
+    // Emit real-time update removed for Vercel Serverless compatibility
     res.status(201).json({ success: true, expense });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -86,9 +83,7 @@ router.put('/:id', auth, async (req, res) => {
     );
     if (!expense) return res.status(404).json({ success: false, error: 'Expense not found' });
 
-    const io = req.app.get('io');
-    if (io) io.emit('expense:updated', expense);
-
+    // Removed io.emit
     res.json({ success: true, expense });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -101,9 +96,7 @@ router.delete('/:id', auth, async (req, res) => {
     const expense = await Expense.findOneAndDelete({ _id: req.params.id, userId: req.userId });
     if (!expense) return res.status(404).json({ success: false, error: 'Expense not found' });
 
-    const io = req.app.get('io');
-    if (io) io.emit('expense:deleted', { id: req.params.id });
-
+    // Removed io.emit
     res.json({ success: true, message: 'Expense deleted' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
