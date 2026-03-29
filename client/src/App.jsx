@@ -126,51 +126,56 @@ const BudgetSetupWizard = ({ onComplete, categories }) => {
   };
 
   return (
-    <div className="modal-overlay animate-fade-in" style={{ zIndex: 2000 }}>
-      <div className="glass-card" style={{ width: '90%', maxWidth: '500px', padding: '32px', textAlign: 'center' }}>
+    <div className="modal-overlay animate-fade-in" style={{ zIndex: 3000 }}>
+      <div className="glass-card" style={{ width: '90%', maxWidth: '440px', padding: '40px 32px', textAlign: 'center' }}>
         {step === 1 ? (
           <>
-            <h2 style={{ fontSize: '1.8rem', marginBottom: '16px' }}>💰 Set Your Monthly Budget</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>How much money do you want to manage this month?</p>
-            <input 
-              type="number" 
-              placeholder="e.g. 20000" 
-              className="expense-input" 
-              style={{ fontSize: '1.5rem', textAlign: 'center', marginBottom: '24px' }}
-              value={total}
-              onChange={(e) => setTotal(e.target.value)}
-            />
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => total > 0 && setStep(2)}>Next ➔</button>
+            <div style={{ fontSize: '3rem', marginBottom: '20px' }}>💰</div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '12px' }}>Set Monthly Budget</h2>
+            <p style={{ color: 'var(--text-dim)', marginBottom: '32px', fontSize: '0.95rem' }}>How much do you want to manage this month?</p>
+            <div style={{ position: 'relative', marginBottom: '32px' }}>
+              <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--ember)' }}>₹</span>
+              <input 
+                type="number" 
+                placeholder="0" 
+                className="form-input" 
+                style={{ fontSize: '1.8rem', textAlign: 'center', height: '70px', fontWeight: 800 }}
+                value={total}
+                onChange={(e) => setTotal(e.target.value)}
+              />
+            </div>
+            <button className="btn-primary" style={{ width: '100%', height: '54px' }} onClick={() => total > 0 && setStep(2)}>Next Step ➔</button>
           </>
         ) : (
           <>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🏷️ Allocate Categories</h2>
-            <div style={{ padding: '8px 16px', background: 'rgba(255,140,0,0.1)', borderRadius: '12px', marginBottom: '24px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Remaining to Allocate</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: remaining < 0 ? '#FC8181' : 'var(--amber)' }}>₹{remaining.toLocaleString()}</div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '12px' }}>Allocate Categories</h2>
+            <div style={{ padding: '12px 16px', background: 'rgba(255,140,0,0.05)', borderRadius: '16px', marginBottom: '24px', border: '1px solid rgba(255,140,0,0.1)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Remaining</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: remaining < 0 ? 'var(--crimson)' : 'var(--ember)' }}>₹{remaining.toLocaleString()}</div>
             </div>
             
-            <div style={{ maxHeight: '40vh', overflowY: 'auto', textAlign: 'left', paddingRight: '12px' }}>
+            <div style={{ maxHeight: '35vh', overflowY: 'auto', textAlign: 'left', paddingRight: '8px', marginBottom: '24px' }}>
               {categories.map(cat => (
-                <div key={cat.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '1.2rem' }}>{cat.emoji}</span>
+                <div key={cat.name} style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '1.4rem' }}>{cat.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{cat.name}</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{cat.name}</div>
                     <input 
                       type="number" 
-                      className="expense-input" 
-                      style={{ padding: '8px' }}
+                      className="form-input" 
+                      style={{ padding: '8px 12px', fontSize: '0.95rem', height: '40px', marginTop: '4px' }}
                       value={allocations[cat.name] || ''}
                       onChange={(e) => setAllocations({ ...allocations, [cat.name]: parseFloat(e.target.value) || 0 })}
+                      placeholder="0"
                     />
                   </div>
                 </div>
               ))}
             </div>
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(1)}>Back</button>
-              <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleComplete}>Save My Budget</button>
+ 
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn-ghost" style={{ flex: 1, height: '50px' }} onClick={() => setStep(1)}>Back</button>
+              <button className="btn-primary" style={{ flex: 2, height: '50px' }} onClick={handleComplete}>Save Budget</button>
             </div>
           </>
         )}

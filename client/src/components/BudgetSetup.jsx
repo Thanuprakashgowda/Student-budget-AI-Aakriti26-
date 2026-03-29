@@ -32,45 +32,51 @@ const BudgetSetup = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      {/* Background orbs */}
-      <div style={{ position: 'fixed', top: '10%', right: '15%', width: 400, height: 400,
-        background: 'radial-gradient(circle, rgba(255,140,0,0.1) 0%, transparent 70%)',
-        pointerEvents: 'none', borderRadius: '50%' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', position: 'relative', overflow: 'hidden' }}>
+      {/* Background orbs (Enhanced) */}
+      <div style={{ position: 'fixed', top: '-5%', right: '-5%', width: 500, height: 500,
+        background: 'radial-gradient(circle, rgba(255,140,0,0.12) 0%, transparent 70%)',
+        pointerEvents: 'none', borderRadius: '50%', filter: 'blur(40px)' }} />
+      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 60%)',
+        pointerEvents: 'none', borderRadius: '50%', filter: 'blur(30px)' }} />
 
-      <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: 540, padding: '40px' }}>
+      <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: 540, padding: '48px 32px', position: 'relative', zIndex: 10 }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
-            width: 64, height: 64, margin: '0 auto 16px',
+            width: 72, height: 72, margin: '0 auto 20px',
             background: 'linear-gradient(135deg, #FF8C00, #FF4500)',
-            borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2rem', boxShadow: '0 8px 32px rgba(255,140,0,0.3)'
+            borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '2.2rem', boxShadow: '0 12px 40px rgba(255,140,0,0.4)',
+            animation: 'float 4s ease-in-out infinite'
           }}>🎯</div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            Welcome, {user?.name?.split(' ')[0] || 'Student'}!
+          <h1 className="text-gradient" style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px' }}>
+            {step === 1 ? "Welcome to SBAI!" : "Almost There!"}
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
-            Let's set up your monthly budget to get started.
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', fontWeight: 500 }}>
+            {step === 1 
+              ? `Hello ${user?.name?.split(' ')[0] || 'Student'}, let's set your budget.` 
+              : "Review and customize your spending categories."}
           </p>
         </div>
 
         {/* Steps Progress */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-          <div style={{ flex: 1, height: '4px', borderRadius: '2px', background: step >= 1 ? 'var(--amber)' : 'rgba(255,255,255,0.1)' }} />
-          <div style={{ flex: 1, height: '4px', borderRadius: '2px', background: step >= 2 ? 'var(--amber)' : 'rgba(255,255,255,0.1)' }} />
+          <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: step >= 1 ? 'var(--ember)' : 'rgba(255,255,255,0.08)', transition: '0.3s' }} />
+          <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: step >= 2 ? 'var(--ember)' : 'rgba(255,255,255,0.08)', transition: '0.3s' }} />
         </div>
 
         {/* STEP 1: Total Budget */}
         {step === 1 && (
           <div className="animate-fade-in">
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>What is your total monthly budget?</h3>
-            <div style={{ position: 'relative', marginBottom: '24px' }}>
-              <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem', color: 'var(--text-muted)' }}>₹</span>
+            <label className="form-label" style={{ marginBottom: '16px', fontSize: '0.9rem' }}>Monthly Budget Limit (₹)</label>
+            <div style={{ position: 'relative', marginBottom: '28px' }}>
+              <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.8rem', fontWeight: 800, color: 'var(--ember)', opacity: 0.8 }}>₹</span>
               <input
                 type="number"
                 className="form-input"
-                style={{ fontSize: '1.5rem', paddingLeft: '40px', paddingtop: '16px', paddingBottom: '16px' }}
-                placeholder="e.g. 10000"
+                style={{ fontSize: '2rem', paddingLeft: '56px', height: '80px', fontWeight: 800 }}
+                placeholder="0"
                 value={globalBudget}
                 onChange={(e) => setGlobalBudget(e.target.value)}
                 autoFocus
@@ -78,12 +84,12 @@ const BudgetSetup = () => {
             </div>
             
             <button 
-              className="btn btn-primary" 
+              className="btn-primary" 
               onClick={handleNext}
               disabled={!globalBudget}
-              style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem' }}
+              style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
             >
-              Continue ➔
+              Continue Setup ➔
             </button>
           </div>
         )}
@@ -91,34 +97,29 @@ const BudgetSetup = () => {
         {/* STEP 2: Categories */}
         {step === 2 && (
           <div className="animate-fade-in">
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>Review your categories</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
-              We've created standard categories for you. You can adjust their budgets or add custom ones.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', maxHeight: '300px', overflowY: 'auto', paddingRight: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '28px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
               {categories.map(cat => (
                 <div key={cat.name} style={{
-                  display: 'flex', alignItems: 'center', gap: '12px', 
-                  background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '12px',
-                  border: '1px solid var(--border)'
+                  display: 'flex', alignItems: 'center', gap: '14px', 
+                  background: 'rgba(255,255,255,0.02)', padding: '14px 18px', borderRadius: '18px',
+                  border: '1px solid rgba(255,255,255,0.04)'
                 }}>
                   <div style={{ 
-                    width: 40, height: 40, borderRadius: '10px', 
-                    background: `${cat.color}22`, color: cat.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem'
+                    width: 44, height: 44, borderRadius: '14px', 
+                    background: `${cat.color}15`, color: cat.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem'
                   }}>
                     {cat.emoji}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{cat.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff' }}>{cat.name}</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>₹</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: 'var(--text-dim)', fontWeight: 700 }}>₹</span>
                     <input 
                       type="number" 
                       className="form-input" 
-                      style={{ width: '90px', padding: '6px 10px', fontSize: '0.9rem' }}
+                      style={{ width: '100px', padding: '10px', fontSize: '1rem', fontWeight: 700, textAlign: 'right' }}
                       value={cat.budget}
                       onChange={(e) => updateBudget(cat.name, Number(e.target.value))}
                     />
@@ -128,49 +129,48 @@ const BudgetSetup = () => {
 
               {/* Add Custom Category Form */}
               {isAdding ? (
-                <div style={{ background: 'rgba(255,140,0,0.06)', padding: '16px', borderRadius: '12px', border: '1px dashed var(--amber)' }}>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                <div className="animate-fade-in" style={{ background: 'rgba(255,140,0,0.05)', padding: '20px', borderRadius: '20px', border: '1px dashed rgba(255,140,0,0.2)' }}>
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
                     <input 
-                      type="text" className="form-input" placeholder="Emoji (e.g. 🏋️)" 
+                      type="text" className="form-input" placeholder="Emoji" 
                       value={newCat.emoji} onChange={e => setNewCat({...newCat, emoji: e.target.value})}
-                      style={{ width: '70px', textAlign: 'center' }} 
+                      style={{ width: '70px', textAlign: 'center', fontSize: '1.5rem' }} 
                     />
                     <input 
                       type="text" className="form-input" placeholder="Category Name" 
                       value={newCat.name} onChange={e => setNewCat({...newCat, name: e.target.value})}
-                      style={{ flex: 1 }} autoFocus
+                      style={{ flex: 1, fontWeight: 600 }} autoFocus
                     />
                   </div>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Budget: ₹</span>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <input 
-                      type="number" className="form-input" placeholder="Amount" 
+                      type="number" className="form-input" placeholder="Budget (₹)" 
                       value={newCat.budget} onChange={e => setNewCat({...newCat, budget: e.target.value})}
-                      style={{ flex: 1 }} 
+                      style={{ flex: 1, fontWeight: 700 }} 
                     />
-                    <button className="btn btn-success" onClick={handleAddCategory} style={{ padding: '8px 16px' }}>Add</button>
-                    <button className="btn btn-ghost" onClick={() => setIsAdding(false)} style={{ padding: '8px 12px' }}>✕</button>
+                    <button className="btn-primary" onClick={handleAddCategory} style={{ padding: '0 20px', height: '48px' }}>Add</button>
+                    <button className="btn-ghost" onClick={() => setIsAdding(false)} style={{ padding: '0 14px', height: '48px', minWidth: '48px' }}>✕</button>
                   </div>
                 </div>
               ) : (
                 <button 
-                  className="btn btn-ghost" 
+                  className="btn-ghost" 
                   onClick={() => setIsAdding(true)}
-                  style={{ width: '100%', justifyContent: 'center', padding: '12px', borderStyle: 'dashed' }}
+                  style={{ width: '100%', justifyContent: 'center', height: '54px', borderStyle: 'dashed', background: 'transparent' }}
                 >
                   + Add Custom Category
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button className="btn btn-ghost" onClick={() => setStep(1)}>Back</button>
+            <div style={{ display: 'flex', gap: '14px' }}>
+              <button className="btn-ghost" onClick={() => setStep(1)} style={{ width: '100px' }}>Back</button>
               <button 
-                className="btn btn-primary" 
+                className="btn-primary" 
                 onClick={handleFinish}
-                style={{ flex: 1, justifyContent: 'center' }}
+                style={{ flex: 1 }}
               >
-                Let's Go 🚀
+                Let's Go! 🚀
               </button>
             </div>
           </div>
