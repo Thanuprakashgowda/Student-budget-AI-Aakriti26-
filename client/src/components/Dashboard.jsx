@@ -244,24 +244,24 @@ const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, catego
       {activeTab === 'overview' && (
         <>
           {/* Stat Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}
-            className="stagger-children">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}
+            className="stagger-children dashboard-grid">
             <StatCard icon="💸" label="Total Spent" value={`₹${totalSpent.toLocaleString()}`} sub="This month" color="#8B5CF6" />
             <StatCard icon="💰" label="Saved" value={`₹${Math.max(0, totalSaved).toLocaleString()}`} sub={`${Math.max(0, savingsPct)}% of budget`} color="#48BB78" />
-            <StatCard icon="📊" label="Transactions" value={expenses.length} sub="Expenses logged" color="#63B3ED" />
+            <StatCard icon="📊" label="Transactions" value={expenses.length} sub="Logged" color="#63B3ED" />
             <StatCard icon="🎯" label="Budget Left" value={`₹${Math.max(0, totalBudget - totalSpent).toLocaleString()}`} sub={`of ₹${totalBudget.toLocaleString()}`} color="#F6AD55" />
           </div>
 
           {/* Category progress */}
           <div className="glass-card animate-fade-in" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 📈 Category Budgets
               </h3>
               <button
                 onClick={() => setShowBudgetEditor(true)}
                 className="btn btn-ghost"
-                style={{ fontSize: '0.8rem', padding: '4px 10px', color: 'var(--amber)', border: '1px solid var(--amber)' }}
+                style={{ fontSize: '0.75rem', padding: '4px 10px', color: 'var(--amber)', border: '1px solid var(--amber)', width: 'auto' }}
               >
                 ⚙️ Adjust
               </button>
@@ -276,9 +276,9 @@ const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, catego
               const info = categoryInfo[cat] || { emoji: '🏷️' };
               return (
                 <div key={cat} style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.87rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.82rem' }}>
                     <span style={{ fontWeight: 600 }}>{info.emoji} {cat}</span>
-                    <span style={{ color: barColor }}>₹{spent.toLocaleString()} / ₹{budget.toLocaleString()} ({pct}%)</span>
+                    <span style={{ color: barColor }}>₹{spent.toLocaleString()} / ₹{budget.toLocaleString()}</span>
                   </div>
                   <div className="progress-bar">
                     <div className="progress-fill" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${barColor}aa, ${barColor})` }} />
@@ -291,13 +291,13 @@ const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, catego
       )}
 
       {activeTab === 'charts' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }} className="dashboard-grid">
           <div className="glass-card animate-fade-in" style={{ padding: '24px' }}>
             <h3 style={{ marginBottom: '16px', fontSize: '1rem', fontWeight: 700 }}>🥧 Spending Breakdown</h3>
             {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 250}>
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90}
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={window.innerWidth < 768 ? 50 : 60} outerRadius={window.innerWidth < 768 ? 80 : 90}
                     paddingAngle={4} dataKey="value" nameKey="name">
                     {pieData.map((entry, index) => {
                       const color = categoryInfo[entry.name]?.color || COLORS[index % COLORS.length];
@@ -306,7 +306,9 @@ const Dashboard = ({ expenses, totals, onDelete, onUpdateBudget, budgets, catego
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
                   <Legend
-                    formatter={(value) => <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{value}</span>}
+                    verticalAlign="bottom"
+                    iconSize={8}
+                    formatter={(value) => <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{value}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>

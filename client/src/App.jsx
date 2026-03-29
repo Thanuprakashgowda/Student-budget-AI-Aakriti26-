@@ -279,8 +279,8 @@ const MainApp = () => {
             </div>
           </div>
 
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '2px', flex: 1, justifyContent: 'center' }}>
+            {/* Tab Icons (Desktop only) */}
+          <div className="hide-mobile" style={{ display: 'flex', gap: '2px', flex: 1, justifyContent: 'center' }}>
             {TABS.map((tab, i) => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 padding: '8px 18px', borderRadius: '8px 8px 0 0', border: 'none', cursor: 'pointer',
@@ -295,8 +295,8 @@ const MainApp = () => {
           </div>
 
           {/* Right: streak + profile */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-            <div style={{ background: 'rgba(255,140,0,0.07)', border: '1px solid rgba(255,140,0,0.2)', borderRadius: '10px', padding: '6px 12px', fontSize: '0.8rem', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <div className="hide-mobile" style={{ background: 'rgba(255,140,0,0.07)', border: '1px solid rgba(255,140,0,0.2)', borderRadius: '10px', padding: '6px 12px', fontSize: '0.8rem', textAlign: 'center' }}>
               <div style={{ color: T.amberLight, fontWeight: 700 }}>🔥 {streak}d</div>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{points} pts</div>
             </div>
@@ -369,13 +369,13 @@ const MainApp = () => {
       )}
 
       {/* ── Main ── */}
-      <main style={{ flex: 1, padding: '24px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+      <main style={{ flex: 1, padding: '16px 12px', maxWidth: '1200px', margin: '0 auto', width: '100%', paddingBottom: '100px' }}>
 
         {/* Level progress */}
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ marginBottom: '24px', padding: '0 8px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '5px' }}>
             <span>{level.name}</span>
-            <span>{nextLevel ? `${nextLevel.min - points} pts to ${nextLevel.name}` : '🏆 Max Level!'}</span>
+            <span className="hide-mobile">{nextLevel ? `${nextLevel.min - points} pts to ${nextLevel.name}` : '🏆 Max Level!'}</span>
           </div>
           <div className="progress-bar" style={{ height: '4px' }}>
             <div className="progress-fill" style={{ width: `${progressToNext}%`, background: T.gradProg, boxShadow: '0 0 10px rgba(255,140,0,0.45)' }} />
@@ -386,13 +386,13 @@ const MainApp = () => {
         {loading && (
           <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
             <div className="spinner" style={{ margin: '0 auto 12px' }} />
-            <div>Loading expenses...</div>
+            <div>Loading data...</div>
           </div>
         )}
 
         {/* Tab Content */}
         {!loading && (
-          <div style={{ flex: 1, padding: '24px 0', maxWidth: '800px', margin: '0 auto', width: '100%', position: 'relative' }}>
+          <div style={{ flex: 1, padding: '0', maxWidth: '800px', margin: '0 auto', width: '100%', position: 'relative' }}>
             {activeTab === 'Dashboard' && (
               <div className="stagger-children">
                 <Dashboard
@@ -423,11 +423,27 @@ const MainApp = () => {
         )}
       </main>
 
+      {/* Mobile Bottom Navigation */}
+      <div className="show-mobile mobile-bottom-nav">
+        {TABS.map((tab, i) => (
+          <button 
+            key={tab} 
+            className={`nav-item ${activeTab === tab ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            <span className="nav-item-icon">{TAB_ICONS[i]}</span>
+            <span>{tab === 'Add Expense' ? 'Add' : tab}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Global Floating Chatbot */}
-      <Chatbot />
+      <div className="chatbot-container" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1001 }}>
+        <Chatbot />
+      </div>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+      <footer className="hide-mobile" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
         Built for 🏆 Hackathon 2026 · StudentBudgetAI ·{' '}
         <span style={{ color: 'var(--green)' }}>AI-EdTech/FinTech · SDG 1 · 8 · 12</span>
       </footer>
@@ -436,7 +452,7 @@ const MainApp = () => {
       
       {setupRequired && (
         <BudgetSetupWizard 
-          onComplete={handleSetupComplete} 
+          onComplete={(total, budgets) => handleSetupComplete(user?._id, total, budgets)} 
           categories={categories} 
         />
       )}

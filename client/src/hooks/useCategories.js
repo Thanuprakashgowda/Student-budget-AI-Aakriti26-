@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 // Hardcoded defaults (matching shared/categories.js)
 const DEFAULT_CATEGORIES = {
@@ -39,11 +40,10 @@ const DEFAULT_BUDGETS = {
   Miscellaneous: 500
 };
 
-// Colors for custom categories
 const CUSTOM_COLORS = ['#FFD740', '#E040FB', '#00E5FF', '#FF4081', '#76FF03', '#F50057'];
-const EMPTY_BUDGETS = {};
 
-export const useCategories = (userId, userBudgets = EMPTY_BUDGETS, totalMonthlyBudget = 0) => {
+export const useCategories = (userId, userBudgets = {}, totalMonthlyBudget = 0) => {
+  const { updateBudgets: syncBudgets } = useAuth();
   const [categories, setCategories] = useState([]);
   const [totalBudget, setTotalBudget] = useState(totalMonthlyBudget);
   const [categorizing, setCategorizing] = useState(false);
@@ -81,7 +81,14 @@ export const useCategories = (userId, userBudgets = EMPTY_BUDGETS, totalMonthlyB
   }, [userId, JSON.stringify(userBudgets), totalMonthlyBudget]);
 
   const saveToBackend = async (updates) => {
-    if (!userId || userId === 'demo-user-id') return;
+    // Also sync to local Auth state for demo persistence
+    if (syncBudgets) {
+      const newTotal = updates.totalMonthlyBudget !== undefined ? updates.totalMonthlyBudget : totalBudget;
+      const newBudgets = updates.budgets || totalsFormat;
+      syncBudgets(newTotal, newBudgets);
+    }
+
+    if (!userId || userId.startsWith('demo-user-id')) return;
     
     try {
       const token = localStorage.getItem('sba_token');

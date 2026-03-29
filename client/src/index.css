@@ -354,11 +354,76 @@ body::before {
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
+  :root {
+    --radius: 12px;
+  }
+
+  body { padding-bottom: 80px; } /* Space for bottom nav */
+
   .hide-mobile { display: none !important; }
-  .glass-card  { border-radius: 12px; }
-  .btn         { padding: 10px 14px; font-size: 0.83rem; }
+  .show-mobile { display: block !important; }
+
+  .glass-card { border-radius: 12px; padding: 16px !important; }
+  .btn { padding: 12px 16px; font-size: 0.88rem; width: 100%; justify-content: center; }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 72px;
+    background: rgba(12, 10, 7, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    padding: 0 10px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .nav-item.active {
+    color: var(--amber);
+  }
+
+  .nav-item-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  .dashboard-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Chatbot adjustments for mobile */
+  .chatbot-container {
+    bottom: 85px !important;
+    right: 16px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile { display: none !important; }
 }
 
 @media (max-width: 480px) {
-  .form-input, .form-select { font-size: 16px; }
+  .form-input, .form-select { font-size: 16px; } /* Prevents iOS zoom on focus */
 }

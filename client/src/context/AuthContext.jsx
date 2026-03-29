@@ -19,9 +19,27 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [isNewUser, setIsNewUser] = useState(false);
 
+  // Sync budgets to localStorage for demo mode
+  const [demoBudgets, setDemoBudgets] = useState(() => {
+    try {
+      const stored = localStorage.getItem(`sba_budgets_${userId}`);
+      return stored ? JSON.parse(stored) : {};
+    } catch { return {}; }
+  });
+  const [demoTotalBudget, setDemoTotalBudget] = useState(() => {
+    return parseFloat(localStorage.getItem(`sba_total_budget_${userId}`) || '0');
+  });
+
   useEffect(() => {
     // Bypass authentication completely for Vercel demo deployment
-    const demoUser = { _id: userId, name: 'Student', email: 'demo@studentbudgetai.com', college: '' };
+    const demoUser = { 
+      _id: userId, 
+      name: 'Student', 
+      email: 'demo@studentbudgetai.com', 
+      college: '',
+      budgets: demoBudgets,
+      totalMonthlyBudget: demoTotalBudget
+    };
     setUser(demoUser);
     localStorage.setItem('sba_token', userId);
     
@@ -29,15 +47,28 @@ export const AuthProvider = ({ children }) => {
     if (!budgetDone) setIsNewUser(true);
     
     setLoading(false);
+  }, [userId, demoBudgets, demoTotalBudget]);
+
+  const updateBudgets = useCallback((newTotal, newBudgets) => {
+    setDemoTotalBudget(newTotal);
+    setDemoBudgets(newBudgets);
+    localStorage.setItem(`sba_total_budget_${userId}`, String(newTotal));
+    localStorage.setItem(`sba_budgets_${userId}`, JSON.stringify(newBudgets));
+    
+    // Mark setup as done if they have a budget
+    if (newTotal > 0) {
+      localStorage.setItem(`sba_budget_done_${userId}`, '1');
+      setIsNewUser(false);
+    }
   }, [userId]);
 
   const login = useCallback(async () => true, []);
   const signup = useCallback(async () => true, []);
   
-  const completeBudgetSetup = useCallback(() => {
-    localStorage.setItem(`sba_budget_done_${userId}`, '1');
+  const completeBudgetSetup = useCallback((userId, total, budgets) => {
+    updateBudgets(total, budgets);
     setIsNewUser(false);
-  }, [userId]);
+  }, [updateBudgets]);
 
   const logout = useCallback(() => {
     // Optionally redirect or reset state
@@ -46,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   const clearError = useCallback(() => setAuthError(null), []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, authError, isNewUser, login, signup, logout, clearError, completeBudgetSetup }}>
+    <AuthContext.Provider value={{ user, token, loading, authError, isNewUser, login, signup, logout, clearError, completeBudgetSetup, updateBudgets }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,8 +7,38 @@ router.post('/', async (req, res) => {
     const { message, expenses, budgets } = req.body;
 
     if (!process.env.GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY is missing from environment variables.');
-      return res.status(500).json({ success: false, message: 'Gemini API key not configured on server. Please add it to your .env file.' });
+      console.warn('GEMINI_API_KEY is missing. Using smart fallback advisor.');
+      
+      // Calculate context for fallback
+      const totalSpent = expenses ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0;
+      const totalBudget = budgets ? Object.values(budgets).reduce((sum, val) => sum + val, 0) : 0;
+      const remaining = totalBudget - totalSpent;
+      const overspentCategories = budgets ? Object.entries(budgets)
+        .filter(([cat, budget]) => {
+          const spent = expenses ? expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0) : 0;
+          return spent > budget;
+        })
+        .map(([cat]) => cat) : [];
+
+      let fallbackReply = `Hi! I'm currently running in "Safe Mode" (no AI key found), but I can still analyze your data! 📊\n\n`;
+      
+      const msg = message.toLowerCase();
+      if (msg.includes('status') || msg.includes('how am i doing') || msg.includes('budget')) {
+        fallbackReply += `You have ₹${remaining.toLocaleString()} remaining from your ₹${totalBudget.toLocaleString()} budget. `;
+        if (overspentCategories.length > 0) {
+          fallbackReply += `Watch out! You've overspent in: ${overspentCategories.join(', ')}. ⚠️`;
+        } else {
+          fallbackReply += `You're doing great and staying within all your limits! 🌟`;
+        }
+      } else if (msg.includes('save') || msg.includes('advice') || msg.includes('tips')) {
+        fallbackReply += `To save more this month, try to reduce spending in your top category. Currently, you've spent ₹${totalSpent.toLocaleString()} in total. Small changes like skipping one outside meal a week can add up! 💡`;
+      } else if (msg.includes('hello') || msg.includes('hi')) {
+        fallbackReply += `Hello student! How can I help you manage your money today? You can ask about your "status" or for "saving tips". 👋`;
+      } else {
+        fallbackReply += `I'm analyzing your data... You have ₹${remaining.toLocaleString()} left. If you set up a Gemini API key in your Vercel settings, I can give much more detailed AI advice! 🚀`;
+      }
+
+      return res.json({ success: true, reply: fallbackReply });
     }
 
     if (!message) {
