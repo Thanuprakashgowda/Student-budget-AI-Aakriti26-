@@ -4,6 +4,7 @@
   "description": "AI-powered expense tracker for students",
   "scripts": {
     "dev": "concurrently \"npm run server-dev\" \"npm run client\"",
+    "build": "cd client && npm install && npm run build",
     "server-dev": "cd server && npm run dev",
     "server": "cd server && node server.js",
     "client": "cd client && npm start",
