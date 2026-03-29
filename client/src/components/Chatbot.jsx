@@ -72,74 +72,75 @@ const Chatbot = () => {
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '16px' }}>
+    <div style={{ position: 'fixed', bottom: '108px', right: '20px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '16px' }}>
       {isOpen && (
-        <div className="glass-card animate-fade-in" style={{ width: '340px', height: '480px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 8px 32px rgba(8,12,20,0.8)' }}>
+        <div className="glass-pane animate-up" style={{ width: 'calc(100vw - 40px)', maxWidth: '360px', height: '500px', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(255,140,0,0.2)', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
           {/* Header */}
-          <div style={{ padding: '16px', background: 'rgba(255,140,0,0.1)', borderBottom: '1px solid rgba(255,140,0,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '1.5rem' }}>🤖</span>
+          <div style={{ padding: '16px', background: 'rgba(255,140,0,0.08)', borderBottom: '1px solid rgba(255,140,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--ember), var(--fire))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                🤖
+              </div>
               <div>
-                <div style={{ fontWeight: 700, color: 'var(--amber)' }}>Budget AI</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Always here to help</div>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: '0.95rem' }}>Budget AI</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Financial Advisor</div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
               <button 
-                title="Clear Chat History"
                 onClick={() => {
-                  if (window.confirm("Clear all chat history?")) {
-                    setMessages([{ role: 'ai', text: `Hi ${user?.name?.split(' ')[0] || 'there'}! I'm StudentBudgetAI. Ask me anything about your spending or budget!` }]);
+                  if (window.confirm("Clear chat?")) {
+                    setMessages([{ role: 'ai', text: `Hi ${user?.name?.split(' ')[0] || 'there'}! I'm StudentBudgetAI. Ask me anything!` }]);
                     if (user?._id) localStorage.removeItem(`sba_chat_${user._id}`);
                   }
                 }} 
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}
-              >
-                🗑️
-              </button>
-              <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '1rem' }}
+              >🗑️</button>
+              <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1rem', fontWeight: 800 }}>✕</button>
             </div>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {messages.map((m, i) => (
               <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
                 <div style={{
-                  padding: '10px 14px', borderRadius: '14px', fontSize: '0.88rem', lineHeight: '1.4',
-                  background: m.role === 'user' ? 'linear-gradient(135deg, #FF8C00, #FF4500)' : 'rgba(255,255,255,0.05)',
-                  color: m.role === 'user' ? '#fff' : 'var(--text-primary)',
-                  borderBottomRightRadius: m.role === 'user' ? '4px' : '14px',
-                  borderBottomLeftRadius: m.role === 'ai' ? '4px' : '14px',
-                  border: m.role === 'ai' ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                  whiteSpace: 'pre-wrap'
+                  padding: '12px 16px', borderRadius: '18px', fontSize: '0.9rem', lineHeight: '1.5',
+                  background: m.role === 'user' ? 'var(--ember)' : 'rgba(255,255,255,0.04)',
+                  color: m.role === 'user' ? '#000' : '#fff',
+                  borderBottomRightRadius: m.role === 'user' ? '4px' : '18px',
+                  borderBottomLeftRadius: m.role === 'ai' ? '4px' : '18px',
+                  border: m.role === 'ai' ? '1px solid rgba(255,255,255,0.04)' : 'none',
                 }}>
                   {m.text}
                 </div>
               </div>
             ))}
             {loading && (
-              <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px 14px', borderRadius: '14px', borderBottomLeftRadius: '4px' }}>
-                <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+              <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.04)', padding: '12px 16px', borderRadius: '18px', borderBottomLeftRadius: '4px' }}>
+                <div className="spinner" style={{ width: '16px', height: '16px' }} />
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSend} style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px' }}>
+          <form onSubmit={handleSend} style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: '10px' }}>
             <input
               type="text"
-              className="form-input"
-              style={{ flex: 1, padding: '10px 14px', borderRadius: '20px' }}
-              placeholder="Ask a question..."
+              className="input-flat"
+              style={{ borderRadius: '50px', padding: '12px 20px', fontSize: '0.9rem' }}
+              placeholder="Type a message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
             />
-            <button type="submit" className="btn btn-primary" style={{ borderRadius: '20px', padding: '10px 16px' }} disabled={loading || !input.trim()}>
-              ➔
-            </button>
+            <button 
+              type="submit" 
+              className="btn-premium" 
+              style={{ padding: 0, width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0 }} 
+              disabled={loading || !input.trim()}
+            >➔</button>
           </form>
         </div>
       )}
@@ -148,15 +149,14 @@ const Chatbot = () => {
         <button
           onClick={() => setIsOpen(true)}
           style={{
-            width: '56px', height: '56px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #FF8C00, #FF4500)',
+            width: '60px', height: '60px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--ember), var(--fire))',
             border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.8rem', boxShadow: '0 4px 20px rgba(255,140,0,0.4)',
-            transition: 'transform 0.2s',
-            animation: 'glow-pulse 2s infinite'
+            fontSize: '1.8rem', boxShadow: '0 10px 30px rgba(255,140,0,0.4)',
+            transition: 'var(--transition)'
           }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1) translateY(-5px)'}
+          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1) translateY(0)'}
         >
           ✨
         </button>

@@ -76,24 +76,24 @@ const ExpenseForm = ({ onAdd, categories, categoryInfo, categorize, categorizing
   const catEmoji = info.emoji;
 
   return (
-    <div className="glass-card animate-fade-in" style={{ padding: '28px' }}>
+    <div className="glass-pane animate-up" style={{ padding: '24px', marginBottom: '100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, background: 'linear-gradient(135deg,#A78BFA,#60A5FA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          ➕ Add Expense
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+          Add <span className="text-gradient">Expense</span>
         </h2>
         <VoiceInput onResult={handleVoiceInput} />
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Amount */}
         <div>
-          <label className="form-label">Amount (₹)</label>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>Amount</div>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '1rem' }}>₹</span>
+            <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ember)', fontWeight: 800, fontSize: '1.2rem' }}>₹</span>
             <input
               type="number"
-              className="form-input"
-              style={{ paddingLeft: '32px' }}
+              className="input-flat"
+              style={{ paddingLeft: '40px', fontSize: '1.5rem', fontWeight: 700 }}
               placeholder="0.00"
               value={form.amount}
               onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
@@ -104,21 +104,20 @@ const ExpenseForm = ({ onAdd, categories, categoryInfo, categorize, categorizing
           </div>
         </div>
 
-        {/* Description with AI badge */}
+        {/* Description */}
         <div>
-          <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            Description
-            {/* Removed AI detecting text for now, using basic selection */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Description</div>
             {aiResult && !categorizing && (
-              <span style={{ color: 'var(--green)', fontSize: '0.75rem' }}>
-                🤖 {aiResult.category} ({Math.round(aiResult.confidence * 100)}%)
-              </span>
+              <div style={{ color: 'var(--emerald)', fontSize: '0.7rem', fontWeight: 600 }}>
+                🤖 AI: {aiResult.category}
+              </div>
             )}
-          </label>
+          </div>
           <input
             type="text"
-            className="form-input"
-            placeholder="e.g. 2 chai at canteen"
+            className="input-flat"
+            placeholder="What was this for?"
             value={form.description}
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             required
@@ -127,12 +126,12 @@ const ExpenseForm = ({ onAdd, categories, categoryInfo, categorize, categorizing
 
         {/* Category selector */}
         <div>
-          <label className="form-label">Category</label>
-          <div style={{ display: 'flex', gap: '8px', height: '42px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>Category</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <div style={{ position: 'relative', flex: 1 }}>
               <select
-                className="form-input"
-                style={{ width: '100%', height: '100%', appearance: 'none', paddingRight: '30px' }}
+                className="input-flat"
+                style={{ width: '100%', appearance: 'none', paddingRight: '40px' }}
                 value={form.category}
                 onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
               >
@@ -142,91 +141,70 @@ const ExpenseForm = ({ onAdd, categories, categoryInfo, categorize, categorizing
                   </option>
                 ))}
               </select>
-              <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-muted)' }}>▼</span>
+              <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-dim)' }}>▼</span>
             </div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn-outline"
               onClick={() => setShowCustomCat(!showCustomCat)}
-              style={{ padding: '0 16px', borderRadius: '10px', height: '100%', border: '1px dashed var(--amber)' }}
+              style={{ padding: '0 16px', fontSize: '1.2rem' }}
             >
-              + New
+              +
             </button>
           </div>
 
           {showCustomCat && (
-            <div className="animate-fade-in" style={{ marginTop: '12px', background: 'rgba(255,140,0,0.06)', padding: '16px', borderRadius: '12px', border: '1px solid var(--amber)' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--amber)' }}>Create Custom Category</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            <div className="animate-up" style={{ marginTop: '16px', background: 'rgba(255,140,0,0.05)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(255,140,0,0.1)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px', color: 'var(--ember)' }}>New Category</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                 <input 
-                  type="text" className="form-input" placeholder="Emoji (e.g. 🏋️)" 
+                  type="text" className="input-flat" placeholder="Emoji" 
                   value={newCatEmoji} onChange={e => setNewCatEmoji(e.target.value)}
-                  style={{ width: '60px', textAlign: 'center', padding: '8px' }} 
+                  style={{ width: '60px', textAlign: 'center' }} 
                 />
                 <input 
-                  type="text" className="form-input" placeholder="Category Name" 
+                  type="text" className="input-flat" placeholder="Name" 
                   value={newCatName} onChange={e => setNewCatName(e.target.value)}
-                  style={{ flex: 1, padding: '8px 12px' }} autoFocus
+                  style={{ flex: 1 }} 
                 />
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Monthly Budget: ₹</span>
-                <input 
-                  type="number" className="form-input" placeholder="Amount" 
-                  value={newCatBudget} onChange={e => setNewCatBudget(e.target.value)}
-                  style={{ flex: 1, padding: '8px 12px' }} 
-                />
-                <button 
-                  type="button" className="btn btn-primary" 
-                  style={{ padding: '8px 16px' }}
-                  onClick={() => {
-                    if (newCatName && newCatBudget) {
-                      addCategory(newCatName.trim(), Number(newCatBudget), newCatEmoji);
-                      setForm(f => ({ ...f, category: newCatName.trim() }));
-                      setShowCustomCat(false);
-                      setNewCatName('');
-                      setNewCatBudget('');
-                    } else {
-                      showToast('Name and budget required', 'error');
-                    }
-                  }}
-                >Add</button>
-              </div>
+              <input 
+                type="number" className="input-flat" placeholder="Monthly Budget (₹)" 
+                value={newCatBudget} onChange={e => setNewCatBudget(e.target.value)}
+                style={{ marginBottom: '12px' }} 
+              />
+              <button 
+                type="button" className="btn-premium" 
+                style={{ width: '100%', height: '44px', fontSize: '0.9rem' }}
+                onClick={() => {
+                  if (newCatName && newCatBudget) {
+                    addCategory(newCatName.trim(), Number(newCatBudget), newCatEmoji);
+                    setForm(f => ({ ...f, category: newCatName.trim() }));
+                    setShowCustomCat(false);
+                    setNewCatName('');
+                    setNewCatBudget('');
+                  } else {
+                    showToast('Details required', 'error');
+                  }
+                }}
+              >Create Category</button>
             </div>
           )}
         </div>
 
         {/* Date */}
         <div>
-          <label className="form-label">Date</label>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>Date</div>
           <input
             type="date"
-            className="form-input"
+            className="input-flat"
             value={form.date}
             onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
           />
         </div>
 
-        {/* Selected preview */}
-        <div style={{
-          background: `${catColor}10`, border: `1px solid ${catColor}30`,
-          borderRadius: '10px', padding: '12px 16px',
-          display: 'flex', alignItems: 'center', gap: '10px'
-        }}>
-          <span style={{ fontSize: '1.4rem' }}>{catEmoji}</span>
-          <div>
-            <div style={{ fontWeight: 700, color: catColor }}>
-              {form.amount ? `₹${form.amount}` : '₹0'} → {form.category}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              {form.description || 'Enter description above'}
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" className="btn btn-primary" disabled={submitting}
-          style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
-          {submitting ? <><span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} /> Saving...</> : '💾 Log Expense (+10 pts)'}
+        <button type="submit" className="btn-premium" disabled={submitting} style={{ marginTop: '10px' }}>
+          {submitting ? 'Saving...' : 'Log Transaction'}
         </button>
       </form>
 

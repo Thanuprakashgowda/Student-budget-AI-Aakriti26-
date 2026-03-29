@@ -26,37 +26,38 @@ const PITCH_METRICS = [
 ];
 
 const SDGCard = ({ sdg }) => (
-  <div className="glass-card" style={{
+  <div className="glass-pane animate-up" style={{
     padding: '20px',
-    borderLeft: `3px solid ${sdg.color}`,
-    transition: 'all 0.2s'
+    borderLeft: `4px solid ${sdg.color}`,
+    marginBottom: '16px'
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-      <span style={{
-        fontSize: '1.6rem', background: `${sdg.color}20`,
-        padding: '8px', borderRadius: '10px', lineHeight: 1
-      }}>{sdg.icon}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+      <div style={{
+        width: '44px', height: '44px', borderRadius: '12px',
+        background: `${sdg.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '1.4rem'
+      }}>{sdg.icon}</div>
       <div>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: sdg.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: sdg.color, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           {sdg.goal}
         </div>
-        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{sdg.title}</div>
+        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{sdg.title}</div>
       </div>
     </div>
 
-    <div style={{ marginBottom: '14px' }}>
-      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: sdg.color, lineHeight: 1 }}>{sdg.metric}</div>
-      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>{sdg.label}</div>
+    <div style={{ marginBottom: '16px' }}>
+      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: sdg.color }}>{sdg.metric}</div>
+      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{sdg.label}</div>
     </div>
 
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
       {sdg.stats.map(s => (
         <div key={s.l} style={{
-          background: `${sdg.color}10`, borderRadius: '8px',
-          padding: '8px 6px', textAlign: 'center'
+          background: 'rgba(255,255,255,0.02)', borderRadius: '12px',
+          padding: '10px 4px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.03)'
         }}>
-          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: sdg.color }}>{s.v}</div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.2 }}>{s.l}</div>
+          <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#fff' }}>{s.v}</div>
+          <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '2px', textTransform: 'uppercase' }}>{s.l}</div>
         </div>
       ))}
     </div>
@@ -64,53 +65,49 @@ const SDGCard = ({ sdg }) => (
 );
 
 const SDGImpact = () => (
-  <div className="glass-card animate-fade-in" style={{ padding: '28px' }}>
+  <div className="animate-up">
     {/* Header */}
     <div style={{ marginBottom: '24px' }}>
-      <h2 style={{
-        fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px',
-        background: 'linear-gradient(135deg,#A78BFA,#60A5FA)',
-        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-      }}>🌐 SDG Impact Dashboard</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.83rem' }}>
-        StudentBudgetAI contributes to UN Sustainable Development Goals
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+        SDG Impact <span className="text-gradient">Dashboard</span>
+      </h2>
+      <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+        How your financial habits contribute to global goals.
       </p>
     </div>
 
     {/* Pitch metrics */}
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px' }}
-      className="stagger-children">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
       {PITCH_METRICS.map(m => (
-        <div key={m.label} className="animate-fade-in" style={{
-          background: `${m.color}10`, border: `1px solid ${m.color}25`,
-          borderRadius: '12px', padding: '14px',
-          display: 'flex', alignItems: 'center', gap: '10px'
+        <div key={m.label} className="glass-pane" style={{
+          padding: '16px',
+          display: 'flex', alignItems: 'center', gap: '12px'
         }}>
-          <span style={{ fontSize: '1.4rem' }}>{m.icon}</span>
+          <span style={{ fontSize: '1.6rem' }}>{m.icon}</span>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: m.color }}>{m.value}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{m.label}</div>
+            <div style={{ fontWeight: 800, fontSize: '1.1rem', color: m.color }}>{m.value}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 600 }}>{m.label}</div>
           </div>
         </div>
       ))}
     </div>
 
     {/* SDG Cards */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div>
       {SDG_DATA.map(sdg => <SDGCard key={sdg.id} sdg={sdg} />)}
     </div>
 
     {/* Badges */}
-    <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(139,92,246,0.08)', borderRadius: '12px', border: '1px solid rgba(139,92,246,0.2)' }}>
-      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--purple-light)', marginBottom: '10px' }}>
+    <div className="glass-pane" style={{ marginTop: '12px', padding: '20px', border: '1px solid rgba(255,140,0,0.1)' }}>
+      <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--ember)', marginBottom: '12px', textTransform: 'uppercase' }}>
         🏅 Impact Badges
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        {['💰 Budget Master', '🤖 AI Pioneer', '📊 Data Driven', '🌱 Eco Saver', '🎓 Smart Student', '🏆 Streak Champion'].map(badge => (
+        {['💰 Budget Master', '🤖 AI Pioneer', '📊 Data Driven', '🌱 Eco Saver', '🎓 Smart Student', '🏆 Streak'].map(badge => (
           <span key={badge} style={{
-            padding: '5px 12px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600,
-            background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)',
-            color: 'var(--purple-light)'
+            padding: '6px 12px', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 700,
+            background: 'rgba(255,140,0,0.06)', border: '1px solid rgba(255,140,0,0.1)',
+            color: 'var(--ember)'
           }}>{badge}</span>
         ))}
       </div>

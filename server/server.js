@@ -102,32 +102,8 @@ let inMemoryExpenses = [];
 let nextId = 1;
 
 function setupInMemoryMode() {
-  const { CATEGORY_BUDGETS } = require('../shared/categories');
-
-  const sampleData = [
-    { amount: 20, description: 'Morning chai at canteen', category: 'Food', date: new Date('2026-03-12'), aiConfidence: 0.95 },
-    { amount: 75, description: 'Auto to college', category: 'Transport', date: new Date('2026-03-12'), aiConfidence: 0.92 },
-    { amount: 250, description: 'Photocopy notes for exam', category: 'Study', date: new Date('2026-03-12'), aiConfidence: 0.88 },
-    { amount: 110, description: 'Mess food lunch', category: 'Food', date: new Date('2026-03-11'), aiConfidence: 0.9 },
-    { amount: 60, description: 'Bus fare to tuition', category: 'Transport', date: new Date('2026-03-11'), aiConfidence: 0.85 },
-    { amount: 350, description: 'Reference book for project', category: 'Study', date: new Date('2026-03-11'), aiConfidence: 0.93 },
-    { amount: 200, description: 'Netflix subscription', category: 'Entertainment', date: new Date('2026-03-10'), aiConfidence: 0.97 },
-    { amount: 15, description: 'Evening chai and biscuit', category: 'Food', date: new Date('2026-03-10'), aiConfidence: 0.92 },
-    { amount: 80, description: 'Uber ride to market', category: 'Transport', date: new Date('2026-03-10'), aiConfidence: 0.89 },
-    { amount: 120, description: 'Dosa and coffee breakfast', category: 'Food', date: new Date('2026-03-09'), aiConfidence: 0.91 },
-    { amount: 500, description: 'College exam fees', category: 'Study', date: new Date('2026-03-09'), aiConfidence: 0.96 },
-    { amount: 150, description: 'Movie tickets weekend', category: 'Entertainment', date: new Date('2026-03-08'), aiConfidence: 0.94 },
-    { amount: 25, description: 'Samosa and chai canteen', category: 'Food', date: new Date('2026-03-08'), aiConfidence: 0.9 },
-    { amount: 100, description: 'Ola to station', category: 'Transport', date: new Date('2026-03-07'), aiConfidence: 0.87 },
-    { amount: 180, description: 'Biryani dinner with friends', category: 'Food', date: new Date('2026-03-07'), aiConfidence: 0.93 }
-  ];
-
-  dbState.expenses = sampleData.map((e) => ({
-    ...e,
-    _id: String(dbState.nextId++),
-    userId: 'demo-user-id',
-    createdAt: new Date()
-  }));
+  dbState.expenses = [];
+  dbState.nextId = 1;
 
   app.get('/api/expenses', (req, res) => {
     const totals = {};
