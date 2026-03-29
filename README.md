@@ -1,26 +1,26 @@
-# StudentBudgetAI 🎓💸
+# StudentBudgetAI
 
 A full-stack, AI-powered personal finance tracker designed specifically for college and university students. Built tightly around modern MERN stack principles with advanced interactive features, ensuring students remain financially healthy while working towards Sustainable Development Goals (SDGs).
 
-## ✨ Features
-- **🎯 Guided Budget Setup Wizard**: A seamless first-time user experience that forces explicit financial planning. No more "random" defaults—users define their total monthly allowance and allocate it with real-time feedback.
-- **⚙️ Editable Budgets & Scoped Overview**: Set and adjust monthly category limits directly from the dashboard. Your view remains clean by automatically hiding categories with zero spending.
-- **🛡️ Strict Budget Validation**: Built-in logic prevents your category-wise allocations from exceeding your total monthly budget, ensuring financial discipline from day one.
-- **🔒 Transparent Data Encryption**: Industry-standard **AES-256-CBC field-level encryption** for sensitive data (`amount`, `description`). Data is encrypted before storage and seamlessly decrypted for your dashboard.
-- **📱 WhatsApp Logging & Commands**: Log expenses instantly via WhatsApp (e.g., `150 chai`). Use the `delete` command to remove your most recent entry, and get friendly AI greetings.
-- **🤖 Generative AI Chatbot (Google Gemini)**: Ask questions about your personal spending (`"Am I spending too much on transport?"`) and get deeply contextual financial assistance based on your real data.
-- **🎤 Voice AI Expense Logging**: State your expenses out loud using SpeechRecognition and let the system intelligently categorize them.
-- **📊 PDF Export Engine**: Generate official bank-statement style monthly PDF reports for scholarship or parent reporting.
-- **🎓 Student-Specific Categories**: Optimized categories for 'Study', 'Transport', 'Food', 'Entertainment', plus the ability to add your own custom categories.
+##  Features
+- ** Guided Budget Setup Wizard**: A seamless first-time user experience that forces explicit financial planning. No more "random" defaults—users define their total monthly allowance and allocate it with real-time feedback.
+- ** Editable Budgets & Scoped Overview**: Set and adjust monthly category limits directly from the dashboard. Your view remains clean by automatically hiding categories with zero spending.
+- ** Strict Budget Validation**: Built-in logic prevents your category-wise allocations from exceeding your total monthly budget, ensuring financial discipline from day one.
+- ** Transparent Data Encryption**: Industry-standard **AES-256-CBC field-level encryption** for sensitive data (`amount`, `description`). Data is encrypted before storage and seamlessly decrypted for your dashboard.
+- ** WhatsApp Logging & Commands**: Log expenses instantly via WhatsApp (e.g., `150 chai`). Use the `delete` command to remove your most recent entry, and get friendly AI greetings.
+- ** Generative AI Chatbot (Google Gemini)**: Ask questions about your personal spending (`"Am I spending too much on transport?"`) and get deeply contextual financial assistance based on your real data.
+- ** Voice AI Expense Logging**: State your expenses out loud using SpeechRecognition and let the system intelligently categorize them.
+- ** PDF Export Engine**: Generate official bank-statement style monthly PDF reports for scholarship or parent reporting.
+- ** Student-Specific Categories**: Optimized categories for 'Study', 'Transport', 'Food', 'Entertainment', plus the ability to add your own custom categories.
 
-## 🚀 Tech Stack
+##  Tech Stack
 - Frontend: React.js, Recharts, jsPDF, Socket.IO Client
 - Backend: Node.js, Express.js, Socket.IO, Twilio SDK
 - Encryption: `crypto` (AES-256-CBC)
 - Database: MongoDB (Mongoose)
 - AI Integration: `@google/generative-ai` (Gemini Flash)
 
-## 🔧 Installation & Setup
+##  Installation & Setup
 
 1. **Clone & Install Dependencies**
 ```bash
